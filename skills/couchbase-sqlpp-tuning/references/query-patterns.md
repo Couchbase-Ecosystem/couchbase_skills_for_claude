@@ -14,6 +14,12 @@ The most common reasons a Couchbase SQL++ query is slow, and what to do about ea
 8. [Array predicate with EVERY](#8-array-predicate-with-every-no-array-index)
 9. [UNNEST not using the array index](#9-unnest-not-using-the-array-index)
 10. [Repeated query without PREPARE](#10-repeated-query-without-prepare)
+11. [SQL injection through string concatenation](#11-sql-injection-through-string-concatenation)
+12. [Wide IN lists](#12-wide-in-lists)
+13. [ORDER BY on a non-indexed expression](#13-order-by-on-a-non-indexed-expression)
+14. [The "magic" anti-pattern: indexing the docType](#14-the-magic-anti-pattern-indexing-the-doctype)
+15. [Filter on a computed field that's expensive](#15-filter-on-a-computed-field-thats-expensive)
+16. [Known document keys without USE KEYS](#16-known-document-keys-without-use-keys)
 
 ## 1. PrimaryScan / no usable index
 
@@ -258,19 +264,30 @@ This isn't a "performance" issue strictly, but every preparable query is a cover
 
 ## 12. Wide IN lists
 
-Symptom: `WHERE id IN [1000-element-list]` is slow or hits document-size limits.
+Symptom: a query with a large `IN` list falls off a latency cliff. No error, correct results, but `indexScan` and `fetch` phase counts are enormous.
 
-Cause: large IN lists become large index spans; very large ones can exceed cluster limits.
+Cause: **spans fanout.** The planner expands `field IN [a, b, c, ...]` — and an `OR` of equality predicates on one field — into one index span per value. There is a ceiling on how many it will generate: **8192 by default, on every shipping version including 8.0.**
 
-Fix: for very large sets (>500 elements), use a temp keyspace or a join, or chunk the query:
+Above the ceiling the planner stops enumerating and silently collapses the spans into a single wide range from `ARRAY_MIN(list)` to `ARRAY_MAX(list)`, marked `"exact": false`, re-checking the `IN` after the scan. A wide `OR` collapses to a full index span. You then pay for every index entry and every document between the smallest and largest value in your list. Nothing errors, so this does not show up in logs as a failure.
+
+**How to confirm it.** There is no error code to search for. Turn on request-level debug logging and read the span count:
 
 ```sql
--- Bad — 5000 IDs
-WHERE id IN [...5000 elements...]
-
--- Better — chunk into batches of 100-500 and union the results
--- Or, load the IDs into a temp keyspace and JOIN
+\set -loglevel "debug";
+SELECT ... FROM ks WHERE c1 > 2 AND c2 IN $list;
 ```
+
+The response's `log` section reports the count, e.g. `d:'ix1' has 12 Spans`. A count far below your list length means you hit the ceiling. In `EXPLAIN`, the tell is an `IndexScan3` whose `spans` array holds one wide range with `"exact": false` instead of many `low == high` entries.
+
+**Fix the query, in this order:**
+
+1. **If the `IN` list is a list of document keys, use `USE KEYS`** — see anti-pattern 16. This removes the Index Service from the plan entirely and the spans question with it.
+2. **If the application already knows the keys, use a KV batch get** from the SDK rather than a query.
+3. **Otherwise keep the list under the ceiling** — chunk it and union the results client-side. (Chunking is engineering judgement, not published Couchbase guidance.)
+
+**Do not reach for the feature flag.** The ceiling is raisable through `queryN1QLFeatCtrl`, but Couchbase documents that setting — and its node-level twin `n1ql-feat-ctrl` — with the words "This setting is provided for technical support only", and publishes no meaning for any of its bits. If a workload genuinely needs a larger fanout, that is a Couchbase Support conversation, not a self-service tuning step.
+
+If Support has already prescribed a value, three things matter. It is a **full replacement bitmask, not a value to OR in** — the commonly quoted `33554508` is the documented default `76` plus the fanout bit, so applying it discards any other feature-control customisation on that cluster. The bits are **disable** bits, so setting the fanout bit turns *off* the feature named "Spans Fanout to 8192" and thereby raises the cap. And the resulting cap is version-dependent: **32K on 7.6.6–7.6.7** (MB-64696), **128K on 7.6.8+ and 8.0.0+** (MB-67805). Below 7.6.6 the flag does nothing at all.
 
 ## 13. ORDER BY on a non-indexed expression
 
@@ -323,6 +340,32 @@ Cause: the function runs once per document in the Fetch + Filter stages.
 Fix:
 - Store the computed value at write time as a separate field, index on the stored field
 - Or build a functional index on `complex_function(field)` directly
+
+## 16. Known document keys without USE KEYS
+
+Symptom: `WHERE META().id = "..."` or `WHERE META().id IN [...]`, and the plan shows an `IndexScan3`, a `PrimaryScan3`, or — on 7.6+ with no suitable index — a sequential scan.
+
+Cause: filtering on the document key through `WHERE` sends the query to the Index Service to look up keys it was already given.
+
+Fix: use `USE KEYS`. It is not an index hint — it removes the Index Service from the plan altogether, emitting a `KeyScan` that feeds `Fetch` directly, which is as close as SQL++ gets to a KV fetch.
+
+```sql
+-- Costs an index round-trip, or a sequential scan if nothing suitable exists
+SELECT * FROM hotel WHERE META().id = "hotel_10025";
+SELECT * FROM hotel WHERE META().id IN ["hotel_10025", "hotel_10026"];
+
+-- Goes straight to the data service
+SELECT * FROM hotel USE KEYS "hotel_10025";
+SELECT * FROM hotel USE KEYS ["hotel_10025", "hotel_10026"];
+```
+
+Verify with `EXPLAIN`: look for `"#operator": "KeyScan"` and the absence of any scan operator.
+
+Mechanics worth knowing. `USE PRIMARY KEYS` is a synonym. It attaches to a keyspace reference only — never a subquery or expression term (error 4110). It works on `UPDATE` and `DELETE` targets and on a `MERGE` **source**, but not on a `MERGE` target. It composes with `WHERE`, which becomes a post-fetch filter. Keys that do not exist are **not an error**: you get warning 5503, "Key(s) in USE KEYS hint not found", and those rows are simply absent — so a query returning fewer rows than keys supplied is normal. Do not rely on results arriving in the order the keys were listed; add an explicit `ORDER BY` if order matters.
+
+**Ask first whether the query is needed at all.** If the application has the keys and wants whole documents, a KV `get` or batch get through the SDK is one network hop instead of two, and is the recommended path. Reach for `USE KEYS` when you need SQL++ on top of those documents — a join, an aggregate, a projection across many keys, or a transactional `UPDATE`. The one real exception: projecting a few fields from large documents across many keys, where a covering index scan can beat the fetch.
+
+Do not "fix" this by creating an unqualified secondary index on `META().id` — that duplicates the primary index and invites intersect scans. If you genuinely need index access on the key, for a `LIKE 'prefix:%'` scan say, make it a partial index gated on that same predicate.
 
 ## What to do next
 

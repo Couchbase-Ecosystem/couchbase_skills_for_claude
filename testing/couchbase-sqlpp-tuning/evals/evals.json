@@ -102,6 +102,35 @@
       "threshold": 2,
       "tier": "standard",
       "expect_skill": "couchbase-fts"
+    },
+    {
+      "name": "known-keys-should-use-use-keys",
+      "input": "My query is SELECT * FROM hotel WHERE META().id IN ['hotel_1','hotel_2']. It's slower than I expect. What should I change?",
+      "expect": [
+        "USE KEYS",
+        "KeyScan",
+        "Index Service"
+      ],
+      "reject": [
+        "create a secondary index on META().id"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "wide-in-list-spans-fanout",
+      "input": "I have a SQL++ query with an IN list of about 50,000 values. It returns the right rows but takes forever and there's no error. What's happening?",
+      "expect": [
+        "8192",
+        "exact",
+        "spans",
+        "USE KEYS"
+      ],
+      "reject": [
+        "queryN1QLFeatCtrl is the recommended fix"
+      ],
+      "threshold": 3,
+      "tier": "deep"
     }
   ]
 }

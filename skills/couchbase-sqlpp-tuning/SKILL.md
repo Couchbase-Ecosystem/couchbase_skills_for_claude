@@ -1,6 +1,6 @@
 ---
 name: couchbase-sqlpp-tuning
-description: "Diagnose and tune slow Couchbase SQL++ queries. Use whenever the user asks about query performance, slow queries, EXPLAIN plans, why an index isn't being used, IntersectScan, PrimaryScan, covering indexes, partial indexes, array indexes (ANY / UNNEST / FLATTEN_KEYS), index selection, optimizer hints, the cost-based optimizer, Auto Update Statistics, the Index Advisor (ADVISE), system:completed_requests, query profiling (kernTime / servTime / execTime), pagination performance, prepared statements, or 'this query is slow / how do I make it faster.' Covers Couchbase Server 7.x and 8.x and flags Enterprise-Edition-only features. Distinct from couchbase-data-modeling (document shape) and couchbase-mcp (operating the cluster) — this skill is about reading plans, designing the right indexes, and reshaping queries that already exist. Use proactively when the user shares an EXPLAIN output or a slow query."
+description: "Diagnose and tune slow Couchbase SQL++ queries. Use whenever the user asks about query performance, slow queries, EXPLAIN plans, why an index isn't being used, IntersectScan, PrimaryScan, covering indexes, partial indexes, array indexes (ANY / UNNEST / FLATTEN_KEYS), index selection, optimizer hints, the cost-based optimizer, Auto Update Statistics, USE KEYS, wide IN lists, spans fanout, the Index Advisor (ADVISE), system:completed_requests, query profiling (kernTime / servTime / execTime), pagination performance, prepared statements, or 'this query is slow / how do I make it faster.' Covers Couchbase Server 7.x and 8.x and flags Enterprise-Edition-only features. Distinct from couchbase-data-modeling (document shape) and couchbase-mcp (operating the cluster) — this skill is about reading plans, designing the right indexes, and reshaping queries that already exist. Use proactively when the user shares an EXPLAIN output or a slow query."
 license: Apache-2.0
 ---
 
@@ -57,6 +57,10 @@ These are the headline rules. Read them before diving into references.
 
 7. **Avoid PrimaryScan in production**, but know that dropping the primary index is no longer a hard stop: **7.6+** added RBAC-controlled *sequential scans*, so a query with no usable index can still run by scanning the Data service. Either way, an unindexed scan is a full-keyspace read — find it and index it.
 
+8. **If the query already knows the document keys, don't go to the Index Service at all.** `WHERE META().id = "..."` or `META().id IN [...]` should be `USE KEYS`, which emits a `KeyScan` straight into a `Fetch` — no `IndexScan3`, no `PrimaryScan3`, no sequential scan. Before that, ask whether SQL++ is needed: if the application holds the keys and wants whole documents, a KV `get` or batch get is one hop instead of two.
+
+9. **A wide `IN` list degrades silently.** The planner expands `IN` into one index span per value and stops at **8192 by default on every version, including 8.0**. Past that it collapses to a single `ARRAY_MIN`..`ARRAY_MAX` range with `"exact": false` and re-filters after the scan — correct results, no error, and a latency cliff. Fix the query (`USE KEYS`, KV batch get, or chunking); raising the cap is a `queryN1QLFeatCtrl` change that Couchbase documents as "for technical support only".
+
 ## Pick the right reference
 
 | Question | Read |
@@ -112,6 +116,8 @@ Quick scan list — if you see any of these, jump to `references/query-patterns.
 - `OR` across different fields (often forces IntersectScan / UnionScan, or no index at all)
 - `EVERY x IN arr SATISFIES ... END` (no array-index support — use `ANY` or `ANY AND EVERY`)
 - `UNNEST` against a `DISTINCT ARRAY` index — it works, but never covers; expect a Fetch
+- `WHERE META().id = ...` or `META().id IN [...]` instead of `USE KEYS` (pointless index round-trip)
+- An `IN` list wider than 8192 elements (spans fanout collapses the scan, silently)
 - `LIMIT 10 OFFSET 1000000` (deep pagination — use keyset pagination)
 - Raw user input concatenated into the statement (injection, and it can't be prepared)
 - A query that runs thousands of times per second with no `PREPARE`
