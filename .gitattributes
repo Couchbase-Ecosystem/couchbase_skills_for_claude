@@ -1,0 +1,7 @@
+# Shell scripts must check out with Unix line endings on every platform.
+#
+# CI executes tools/validate-skills.sh directly on Ubuntu, and bash refuses a
+# script whose lines end in CRLF. Without this, a clone on Windows with the
+# default core.autocrlf=true gets CRLF in the working tree and the script fails
+# locally in a way that is hard to recognise from the error.
+*.sh text eol=lf
