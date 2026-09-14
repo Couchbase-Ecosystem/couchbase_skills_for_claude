@@ -1,0 +1,105 @@
+{
+  "skill": "couchbase-xdcr",
+  "cases": [
+    {
+      "name": "active-active-vs-active-passive",
+      "input": "Two regions, both taking writes. Should we run active-active XDCR or keep one side passive?",
+      "expect": [
+        "conflict",
+        "eventual consistency",
+        "discarded",
+        "unidirectional"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "replication-is-behind",
+      "input": "changes_left on one of our XDCR replications has been climbing all morning. How do I diagnose it?",
+      "expect": [
+        "changes_left",
+        "replication",
+        "target",
+        "monitor"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "conflict-mode-fixed-at-bucket-creation",
+      "input": "Can I switch our XDCR conflict resolution from sequence number to timestamp on the existing buckets?",
+      "expect": [
+        "cannot be changed",
+        "bucket creation",
+        "same",
+        "policy"
+      ],
+      "reject": [
+        "yes, change it in the bucket settings"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "ten-user-xattr-limit",
+      "input": "We want active-active XDCR with Sync Gateway. Our documents carry about a dozen user xattrs. Any concerns?",
+      "expect": [
+        "10 user xattrs",
+        "silently skips",
+        "subdoc_cmd_docs_skipped",
+        "diverge"
+      ],
+      "reject": [
+        "there is no xattr limit",
+        "XDCR returns an error for those documents"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "no-custom-js-conflict-resolver",
+      "input": "On 8.0, can I write a JavaScript function that merges the two conflicting versions instead of one winning?",
+      "expect": [
+        "no custom JavaScript",
+        "sequence number",
+        "timestamp",
+        "Conflict Logging"
+      ],
+      "reject": [
+        "yes, write a custom conflict resolution function"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "xdcr-is-enterprise-only",
+      "input": "Our DR cluster is Community Edition. Can we replicate to it with XDCR?",
+      "expect": [
+        "Enterprise Edition",
+        "no",
+        "7.0"
+      ],
+      "reject": [
+        "yes, XDCR is available in Community Edition"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-sync-to-devices",
+      "input": "How do I get a subset of this data down to 4000 Android tablets that are offline half the day?",
+      "expect": [
+        "couchbase-mobile",
+        "Sync Gateway"
+      ],
+      "reject": [
+        "create an XDCR replication"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-mobile"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "skill": "couchbase-sqlpp-tuning",
+  "cases": [
+    {
+      "name": "primaryscan-despite-index",
+      "input": "Why is my query doing a PrimaryScan when I have an index on the field I'm filtering on?",
+      "expect": [
+        "leading key",
+        "WHERE",
+        "INCLUDE MISSING",
+        "IS NOT MISSING"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "make-it-covering",
+      "input": "How do I get rid of the Fetch operator in this plan so the query is served entirely from the index?",
+      "expect": [
+        "covering",
+        "covers",
+        "one composite index",
+        "project"
+      ],
+      "reject": [
+        "use two indexes together"
+      ],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "unnest-needs-all-array",
+      "input": "My UNNEST query isn't using the array index I created with DISTINCT ARRAY. Why not?",
+      "expect": [
+        "ALL ARRAY",
+        "DISTINCT ARRAY"
+      ],
+      "reject": [
+        "DISTINCT ARRAY works for UNNEST",
+        "recreate it as a DISTINCT ARRAY index"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "approx-vector-distance-uses-the-index",
+      "input": "Is there any difference between VECTOR_DISTANCE() and APPROX_VECTOR_DISTANCE() in my ORDER BY?",
+      "expect": [
+        "APPROX_VECTOR_DISTANCE",
+        "does not use the vector index",
+        "brute-force"
+      ],
+      "reject": [
+        "VECTOR_DISTANCE() uses the vector index",
+        "they are equivalent"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "no-using-hyperscale-clause",
+      "input": "Write me the DDL for a Hyperscale vector index - I think it's CREATE VECTOR INDEX ... USING HYPERSCALE?",
+      "expect": [
+        "CREATE VECTOR INDEX",
+        "no",
+        "USING HYPERSCALE",
+        "VECTOR"
+      ],
+      "reject": [
+        "USING HYPERSCALE is the correct clause"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "aus-is-off-by-default",
+      "input": "We're on 8.0 Enterprise. Are CBO statistics kept up to date automatically now?",
+      "expect": [
+        "Auto Update Statistics",
+        "opt-in",
+        "disabled by default",
+        "UPDATE STATISTICS"
+      ],
+      "reject": [
+        "AUS is enabled by default"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-text-relevance-search",
+      "input": "I need fuzzy, relevance-ranked matching across product descriptions with stemming for English.",
+      "expect": [
+        "couchbase-fts",
+        "Search Service",
+        "Search index"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-fts"
+    }
+  ]
+}

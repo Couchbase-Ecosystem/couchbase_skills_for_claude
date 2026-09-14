@@ -1,0 +1,91 @@
+{
+  "skill": "couchbase-performance-tuning",
+  "cases": [
+    {
+      "name": "kv-latency-diagnosis",
+      "input": "KV get latency on our cluster is 4x what it was last month and nothing changed in the app. Where do I look?",
+      "expect": [
+        "memory",
+        "disk",
+        "CPU",
+        "bg_fetched",
+        "watermark"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "connection-limits",
+      "input": "We're seeing connection errors under load. How many KV connections can a Data node take and what should I change first?",
+      "expect": [
+        "60,000",
+        "SDK connection pools",
+        "file descriptors"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "memory-watermarks",
+      "input": "At what point does Couchbase start ejecting documents from memory?",
+      "expect": [
+        "75%",
+        "85%",
+        "high watermark",
+        "ejection"
+      ],
+      "reject": [
+        "ejection starts at 90%",
+        "ejection starts at 100%"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "no-published-throughput-figures",
+      "input": "What ops/sec should I expect per Couchbase node so I know if we're underperforming?",
+      "expect": [
+        "does not publish",
+        "baseline",
+        "measure",
+        "your own"
+      ],
+      "reject": [
+        "expect 100,000 ops/sec per node"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-query-plan-problem",
+      "input": "One specific SQL++ report query takes 30 seconds; EXPLAIN shows an IntersectScan across two indexes.",
+      "expect": [
+        "couchbase-sqlpp-tuning",
+        "query-level performance",
+        "EXPLAIN"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-sqlpp-tuning"
+    },
+    {
+      "name": "real-system-tuning-tool-names",
+      "input": "Over MCP, how do I raise the Index service memory quota and watch a rebalance's progress? Give exact tool names, and tell me if any of this is not available over MCP.",
+      "expect": [
+        "admin_cluster_memory_set",
+        "admin_rebalance_progress",
+        "couchbase-cli"
+      ],
+      "reject": [
+        "admin_cluster_update_settings",
+        "admin_rebalance_status",
+        "admin_stats_nodes"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    }
+  ]
+}

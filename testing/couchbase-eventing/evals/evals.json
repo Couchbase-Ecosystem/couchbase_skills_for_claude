@@ -1,0 +1,74 @@
+{
+  "skill": "couchbase-eventing",
+  "cases": [
+    {
+      "name": "write-an-onupdate-handler",
+      "input": "I want a function that writes an audit document into another collection every time a document in orders changes.",
+      "expect": [
+        "OnUpdate",
+        "bucket alias",
+        "idempotent",
+        "Listen To Location"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "function-deployed-but-nothing-happens",
+      "input": "My Eventing function shows as deployed but nothing is being processed and no documents appear in the target collection.",
+      "expect": [
+        "Feed Boundary",
+        "From now",
+        "Listen To Location",
+        "Eventing Storage"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "eventing-is-enterprise-only",
+      "input": "We run Community Edition. Can I use an Eventing function with a timer and a curl() call to an external API?",
+      "expect": [
+        "Enterprise Edition",
+        "no",
+        "DCP",
+        "SDK"
+      ],
+      "reject": [
+        "yes, Eventing is available in Community Edition"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "feed-boundary-is-not-a-deploy-parameter",
+      "input": "Can I pass feed boundary = from now as an argument when I call deploy?",
+      "expect": [
+        "persistent setting",
+        "function definition",
+        "dcp_stream_boundary",
+        "not a parameter"
+      ],
+      "reject": [
+        "pass it on the deploy call"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-dcp-consumer-in-app-code",
+      "input": "I want my Java service to react to every mutation in a collection without running code on the cluster.",
+      "expect": [
+        "couchbase-app-integration",
+        "DCP consumer",
+        "outside the cluster"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-app-integration"
+    }
+  ]
+}

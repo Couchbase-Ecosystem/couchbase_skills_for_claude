@@ -1,0 +1,77 @@
+{
+  "skill": "couchbase-mcp",
+  "cases": [
+    {
+      "name": "explore-a-cluster",
+      "input": "Connected to a Couchbase cluster over MCP. What buckets, scopes and collections are there, and what's in the airline collection?",
+      "expect": [
+        "get_buckets_in_cluster",
+        "get_scopes_and_collections_in_bucket",
+        "get_schema_for_collection"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "scoped-sqlpp-and-parameters",
+      "input": "Run a SQL++ query over MCP filtering airlines by a country the user typed in.",
+      "expect": [
+        "run_sql_plus_plus_query",
+        "named_parameters",
+        "bucket_name",
+        "scope_name"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "read-only-default",
+      "input": "upsert_document_by_id isn't in the tool list. How do I get it back?",
+      "expect": [
+        "CB_MCP_READ_ONLY_MODE",
+        "true",
+        "not loaded",
+        "working as intended"
+      ],
+      "reject": [
+        "defaults to false",
+        "the server is broken"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "no-npx-install",
+      "input": "What's the right mcpServers config entry to launch the Couchbase MCP server - is npx couchbase-mcp-server correct?",
+      "expect": [
+        "uvx",
+        "couchbase-mcp-server",
+        "No npx"
+      ],
+      "reject": [
+        "npx couchbase-mcp-server is correct"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-create-a-bucket",
+      "input": "Create a new bucket and add a user with the data_writer role on it.",
+      "expect": [
+        "data-plane only",
+        "Web Console",
+        "couchbase-cli",
+        "Management REST API"
+      ],
+      "reject": [
+        "create_bucket",
+        "admin_bucket_create"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-admin-mcp"
+    }
+  ]
+}

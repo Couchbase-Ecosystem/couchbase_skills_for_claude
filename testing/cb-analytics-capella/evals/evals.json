@@ -1,0 +1,76 @@
+{
+  "skill": "cb-analytics-capella",
+  "cases": [
+    {
+      "name": "discover-org-and-cluster-ids",
+      "input": "I want to list the Capella clusters in my org through the MCP server but I don't know any of the IDs. Where do I start?",
+      "expect": [
+        "capella_list_organizations",
+        "capella_list_clusters",
+        "org_id",
+        "project_id"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "restore-a-capella-backup",
+      "input": "I need to restore last night's Capella backup into a different cluster, not the one it came from.",
+      "expect": [
+        "capella_restore_backup",
+        "target_cluster_id",
+        "capella_list_backups",
+        "confirm"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "columnar-endpoint-names-are-not-a-bug",
+      "input": "The Capella v4 API has resource groups called 'Columnar Analytics Clusters' but the product is called Capella Analytics now. Is the endpoint name wrong - should I change it in my script?",
+      "expect": [
+        "API resource names still say",
+        "rebranded",
+        "Capella Analytics",
+        "do not",
+        "August 2025"
+      ],
+      "reject": [
+        "the endpoint name is wrong",
+        "rename the endpoint"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "analytics-cluster-is-not-operational-cluster",
+      "input": "capella_get_cluster returns not found for my Capella Analytics cluster. Is my ID stale?",
+      "expect": [
+        "not an operational cluster",
+        "Analytics",
+        "these tools do not",
+        "Analytics endpoints"
+      ],
+      "reject": [
+        "capella_get_cluster works for Analytics clusters"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-create-a-couchbase-user",
+      "input": "How do I create a least-privileged Couchbase user for my automation to query Analytics with?",
+      "expect": [
+        "cb-analytics-security",
+        "Analytics roles",
+        "service account"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-security"
+    }
+  ]
+}

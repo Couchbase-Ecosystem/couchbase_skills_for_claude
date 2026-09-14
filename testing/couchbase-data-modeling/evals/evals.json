@@ -1,0 +1,75 @@
+{
+  "skill": "couchbase-data-modeling",
+  "cases": [
+    {
+      "name": "embed-or-reference",
+      "input": "Each of our customers has up to a few thousand orders. Should the orders be embedded in the customer document or kept separate?",
+      "expect": [
+        "read",
+        "write",
+        "embed",
+        "reference",
+        "20 MiB"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "bucket-scope-collection",
+      "input": "We're multi-tenant with about 200 tenants and 6 document types each. Bucket per tenant, scope per tenant, or something else?",
+      "expect": [
+        "scope",
+        "collection",
+        "lifecycle",
+        "30 buckets"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "key-length-limit",
+      "input": "How long can a Couchbase document key be? We're thinking of concatenating a tenant UUID, a type prefix and a natural key.",
+      "expect": [
+        "250 bytes",
+        "hard limit"
+      ],
+      "reject": [
+        "246 bytes",
+        "255 bytes"
+      ],
+      "threshold": 1,
+      "tier": "deep"
+    },
+    {
+      "name": "scope-and-collection-ceilings",
+      "input": "Is there a limit on how many scopes and collections I can create across the cluster?",
+      "expect": [
+        "1000 scopes",
+        "1000 collections",
+        "per cluster"
+      ],
+      "reject": [
+        "unlimited scopes"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-how-much-ram",
+      "input": "Given that model - 400 million documents at 1.5KB with one replica - how much cluster RAM quota do I need?",
+      "expect": [
+        "couchbase-sizing",
+        "RAM and disk",
+        "replica"
+      ],
+      "reject": [
+        "embed the orders"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-sizing"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "skill": "couchbase-migration-execution",
+  "cases": [
+    {
+      "name": "migrate-from-mongodb",
+      "input": "We need to move a 300GB MongoDB collection into Couchbase with no downtime. What's the plan?",
+      "expect": [
+        "cbmigrate",
+        "CDC",
+        "dual-write",
+        "validate",
+        "cutover"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "big-bang-vs-phased",
+      "input": "Should we do this as a big-bang cutover over a weekend or phase it domain by domain?",
+      "expect": [
+        "big-bang",
+        "phased",
+        "downtime",
+        "rollback"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "cbmigrate-sources-and-packaging",
+      "input": "Is cbmigrate part of the server install, and does it support Cassandra?",
+      "expect": [
+        "separate download",
+        "MongoDB",
+        "DynamoDB",
+        "Hugging Face"
+      ],
+      "reject": [
+        "cbmigrate ships with the server",
+        "cbmigrate supports Cassandra"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "cbtransfer-is-deprecated",
+      "input": "Can I just use cbtransfer to move the data between the two clusters?",
+      "expect": [
+        "deprecated",
+        "cbdatarecovery",
+        "XDCR"
+      ],
+      "reject": [
+        "cbtransfer is the recommended tool"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "bucket-per-source-database-does-not-scale",
+      "input": "We have 80 source databases. Can we create one Couchbase bucket per database?",
+      "expect": [
+        "30 buckets",
+        "scopes",
+        "collections"
+      ],
+      "reject": [
+        "yes, create 80 buckets"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-design-the-target-model",
+      "input": "Our relational schema has orders, line items and customers in three tables. What should the Couchbase document shape be?",
+      "expect": [
+        "couchbase-data-modeling",
+        "modeling transformation",
+        "access pattern",
+        "denormaliz"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-data-modeling"
+    }
+  ]
+}

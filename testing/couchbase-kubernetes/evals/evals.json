@@ -1,0 +1,83 @@
+{
+  "skill": "couchbase-kubernetes",
+  "cases": [
+    {
+      "name": "deploy-on-kubernetes",
+      "input": "How do I install the Couchbase Operator and deploy a 3-node cluster on EKS?",
+      "expect": [
+        "CouchbaseCluster",
+        "Helm",
+        "cao",
+        "couchbase.com/v2"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "availability-zone-awareness",
+      "input": "All three of my Couchbase pods landed in the same AWS availability zone. How do I make the Operator spread them?",
+      "expect": [
+        "server groups",
+        "topology",
+        "zone"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "xdcr-resource-name",
+      "input": "What custom resource do I create to define an XDCR replication under the Operator, and where do the remote clusters go?",
+      "expect": [
+        "CouchbaseReplication",
+        "spec.xdcr.remoteClusters"
+      ],
+      "reject": [
+        "CouchbaseRemoteCluster"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "memcached-bucket-crd-gate",
+      "input": "Can I use the CouchbaseMemcachedBucket resource on a cluster we're moving to Couchbase Server 8.0?",
+      "expect": [
+        "removed in Couchbase Server 8.0",
+        "7.x only"
+      ],
+      "reject": [
+        "CouchbaseMemcachedBucket works on 8.0"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "changes-reverted-by-operator",
+      "input": "I changed a bucket's RAM quota in the Web Console and it reverted a minute later. What's going on?",
+      "expect": [
+        "reconcile",
+        "custom resource",
+        "reverted"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "near-miss-version-path-to-8",
+      "input": "We're on Couchbase Server 7.1 and want to get to 8.0. What's the supported version path?",
+      "expect": [
+        "couchbase-upgrade",
+        "version path",
+        "Operator does not decide"
+      ],
+      "reject": [
+        "upgrade directly from 7.1 to 8.0"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-upgrade"
+    }
+  ]
+}

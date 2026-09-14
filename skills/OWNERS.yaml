@@ -1,0 +1,142 @@
+# Skill ownership
+#
+# Every skill under skills/ must have an entry here.
+#
+#   name                 the skill directory name
+#   dris                 one or two GitHub usernames, no leading @; the first is primary
+#   last_reviewed        ISO date (YYYY-MM-DD) of the last content review
+#   review_cadence_days  how often the content must be re-verified against docs.couchbase.com
+#
+# Skills in this repository carry version-sensitive product facts, so an unreviewed
+# skill decays. Treat an overdue last_reviewed as a bug, not a formality.
+#
+# The DRI on every skill below is an INTERIM assignment carried over from the
+# donation of this collection. Reassign each skill to the team that owns the
+# surface it documents -- mobile to the mobile team, the Operator skill to the
+# Kubernetes team, and so on -- as those owners are identified.
+
+skills:
+  - name: cb-analytics-admin
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: cb-analytics-capella
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: cb-analytics-cluster
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: cb-analytics-links
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: cb-analytics-mcp-setup
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: cb-analytics-query
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: cb-analytics-schema
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: cb-analytics-security
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-admin-mcp
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-ai-applications
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-app-integration
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-backup-restore
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-capella
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-coding-standards
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-columnar
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-data-modeling
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-eventing
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-fts
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-kubernetes
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-magma
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-mcp
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-migration-execution
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-mobile
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-observability
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-performance-tuning
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-security-hardening
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-sizing
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-sqlpp-tuning
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-transactions
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-upgrade
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90
+  - name: couchbase-xdcr
+    dris: [celticht32]  # interim -- reassign to the owning team
+    last_reviewed: "2026-09-14"
+    review_cadence_days: 90

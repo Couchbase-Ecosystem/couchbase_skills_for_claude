@@ -1,0 +1,111 @@
+{
+  "skill": "couchbase-upgrade",
+  "cases": [
+    {
+      "name": "path-from-7-1-to-8",
+      "input": "We're on Couchbase Server 7.1.4. What's the supported upgrade path to 8.0?",
+      "expect": [
+        "7.2.3",
+        "latest 7.2.x",
+        "8.0",
+        "no direct"
+      ],
+      "reject": [
+        "upgrade directly from 7.1 to 8.0",
+        "7.1 to 8.0 is supported directly"
+      ],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "memcached-buckets-block-the-upgrade",
+      "input": "We still have one memcached bucket for sessions. Anything to do before upgrading to 8.0?",
+      "expect": [
+        "removed in 8.0",
+        "exits with an error",
+        "Ephemeral"
+      ],
+      "reject": [
+        "memcached buckets are still supported in 8.0",
+        "no action needed"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "pick-the-upgrade-procedure",
+      "input": "We have no spare hardware and can't take downtime. Which upgrade procedure should we use?",
+      "expect": [
+        "swap rebalance",
+        "reduced capacity",
+        "graceful failover",
+        "delta recovery"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "delta-recovery-is-data-only",
+      "input": "Can I use graceful failover with delta recovery to upgrade our Query/Index nodes?",
+      "expect": [
+        "Data Service alone",
+        "only",
+        "no",
+        "swap rebalance"
+      ],
+      "reject": [
+        "yes, delta recovery works for any service"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "ce-to-ee-is-not-a-version-upgrade",
+      "input": "Can we go from Community Edition 7.2 straight to Enterprise Edition 8.0 in one pass?",
+      "expect": [
+        "two separate",
+        "same version number",
+        "swap rebalance",
+        "not"
+      ],
+      "reject": [
+        "yes, do it in one upgrade",
+        "delta recovery works for an edition change"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-operator-rolling-upgrade",
+      "input": "Our cluster runs under the Couchbase Operator on OpenShift. How does the upgrade actually get rolled out there?",
+      "expect": [
+        "couchbase-kubernetes",
+        "Autonomous Operator",
+        "Operator"
+      ],
+      "reject": [
+        "run the installer on each node"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-kubernetes"
+    },
+    {
+      "name": "real-post-upgrade-tool-names",
+      "input": "Post-upgrade verification over MCP: what do I call to confirm the cluster is out of mixed mode, to run a smoke-test SQL++ count, and to check XDCR backlog? Give exact tool names.",
+      "expect": [
+        "admin_cluster_info",
+        "run_sql_plus_plus_query",
+        "admin_xdcr_replications_list"
+      ],
+      "reject": [
+        "cb_query",
+        "admin_cluster_status",
+        "admin_stats_xdcr"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "skill": "couchbase-capella",
+  "cases": [
+    {
+      "name": "connect-an-app-to-capella",
+      "input": "My Python app can't connect to our new Capella cluster. I'm using my Capella login email and password in the connection string.",
+      "expect": [
+        "cluster access credentials",
+        "not",
+        "Capella login",
+        "allowed IP",
+        "couchbases://"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "private-networking-for-production",
+      "input": "For production, should I just allowlist our NAT gateway IP or set up something else?",
+      "expect": [
+        "VPC peering",
+        "private endpoint",
+        "prefer private networking",
+        "allowed IP"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "service-groups-and-node-cap",
+      "input": "How do services get deployed on a Capella cluster, and how many nodes can one cluster have?",
+      "expect": [
+        "Service Group",
+        "27 nodes",
+        "Custom",
+        "Multi-Node"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "management-api-v4-base-url",
+      "input": "What's the base URL and version of the Capella management API I should script against?",
+      "expect": [
+        "cloudapi.cloud.couchbase.com",
+        "/v4"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "near-miss-how-big-should-the-cluster-be",
+      "input": "We have 800 million documents averaging 2KB with a 20% working set. How many nodes and how much RAM do I need on Capella?",
+      "expect": [
+        "couchbase-sizing",
+        "Service Group",
+        "compute and storage"
+      ],
+      "reject": [
+        "create a Capella cluster in the UI"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-sizing"
+    }
+  ]
+}

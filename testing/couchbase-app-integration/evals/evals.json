@@ -1,0 +1,76 @@
+{
+  "skill": "couchbase-app-integration",
+  "cases": [
+    {
+      "name": "which-durability-level",
+      "input": "I'm writing a payment record from our Java service. What durability level should the upsert use?",
+      "expect": [
+        "majority",
+        "persistToMajority",
+        "majorityAndPersistActive",
+        "per-operation"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "smoke"
+    },
+    {
+      "name": "read-your-own-writes",
+      "input": "After my app writes a document, the very next SQL++ query doesn't see it. What do I change in the client?",
+      "expect": [
+        "NotBounded",
+        "RequestPlus",
+        "consistent_with",
+        "mutation token"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "durability-on-ephemeral-buckets",
+      "input": "Can I use persistToMajority on an Ephemeral bucket?",
+      "expect": [
+        "persistence",
+        "Couchbase buckets",
+        "not",
+        "Ephemeral"
+      ],
+      "reject": [
+        "yes, persistToMajority works on Ephemeral buckets"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "memcached-bucket-removed-in-8",
+      "input": "Our cache tier uses a memcached bucket. We're moving to Couchbase Server 8.0 - does the client code still work?",
+      "expect": [
+        "removed in 8.0",
+        "Ephemeral"
+      ],
+      "reject": [
+        "memcached buckets are still supported in 8.0",
+        "memcached buckets are deprecated but available in 8.0"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-embed-or-reference",
+      "input": "Should a user's order history live inside the user document or as separate order documents?",
+      "expect": [
+        "embed",
+        "reference",
+        "read pattern",
+        "write pattern"
+      ],
+      "reject": [
+        "use the async SDK"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-data-modeling"
+    }
+  ]
+}

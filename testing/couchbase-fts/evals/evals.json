@@ -1,0 +1,93 @@
+{
+  "skill": "couchbase-fts",
+  "cases": [
+    {
+      "name": "field-not-matching",
+      "input": "My Search query returns nothing for a field I know is in the documents. The index was built with a type mapping.",
+      "expect": [
+        "index definition",
+        "not mapped",
+        "dynamic mapping",
+        "analyzer"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "fuzzy-and-phrase-search",
+      "input": "How do I add typo tolerance and exact phrase matching to our product search?",
+      "expect": [
+        "fuzziness",
+        "match_phrase",
+        "analyzer"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "search-vector-index-in-ce",
+      "input": "We're on Community Edition 7.6.4 on Linux. Can we do kNN vector search, and can we have index replicas?",
+      "expect": [
+        "Search Vector Index",
+        "Community Edition",
+        "replicas",
+        "Enterprise"
+      ],
+      "reject": [
+        "Search index replicas are available in Community Edition",
+        "vector search requires Enterprise Edition"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "vector-dimension-and-platform-limits",
+      "input": "We want 3072-dimension embeddings in a Search index and our dev boxes are Windows. Any problems?",
+      "expect": [
+        "4096",
+        "7.6.2",
+        "not supported on Windows"
+      ],
+      "reject": [
+        "Windows is supported for vector search",
+        "the limit is 2048 dimensions"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-end-to-end-rag-design",
+      "input": "I'm designing a RAG system end to end - chunking, embedding pipeline, retrieval strategy and LangChain integration. Where do I start?",
+      "expect": [
+        "couchbase-ai-applications",
+        "embedding",
+        "retrieval",
+        "vector index"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-ai-applications"
+    },
+    {
+      "name": "real-search-tool-names",
+      "input": "Over MCP, which tool actually runs a Search query against index 'products-idx', and which tool tells me the index's document count and ingest backlog? Name the exact tool names and which server each is on.",
+      "expect": [
+        "run_fts_query",
+        "admin_fts_index_doc_count",
+        "admin_fts_index_stats",
+        "couchbase-admin-mcp"
+      ],
+      "reject": [
+        "cb_fts_search",
+        "admin_fts_index_status",
+        "admin_fts_index_pause",
+        "admin_stats_fts"
+      ],
+      "threshold": 3,
+      "tier": "standard"
+    }
+  ]
+}

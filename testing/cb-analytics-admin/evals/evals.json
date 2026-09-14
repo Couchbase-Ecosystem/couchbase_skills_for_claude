@@ -1,0 +1,76 @@
+{
+  "skill": "cb-analytics-admin",
+  "cases": [
+    {
+      "name": "ingestion-looks-stuck",
+      "input": "Our Analytics ingestion looks stuck on the prod cluster - the dataset hasn't moved in an hour. How do I check what's going on?",
+      "expect": [
+        "get_ingestion_status",
+        "pendingOperations",
+        "get_service_status",
+        "get_active_requests"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "cancel-runaway-query",
+      "input": "There's an Analytics query that has been running for 40 minutes and is eating the whole node. Can you kill it?",
+      "expect": [
+        "get_active_requests",
+        "client_context_id",
+        "cancel_request",
+        "confirm"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "restart-is-cluster-wide",
+      "input": "Just restart the Analytics service to clear the slow query, that's easier right?",
+      "expect": [
+        "cluster-wide",
+        "all active queries fail",
+        "cancel",
+        "warn"
+      ],
+      "reject": [
+        "restarting the service is the safest first step"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "autofailover-will-not-save-analytics",
+      "input": "One of our Analytics nodes is sick but the host is still up. Will auto-failover take care of it if I turn it on?",
+      "expect": [
+        "Data and Index",
+        "not",
+        "manual",
+        "restart"
+      ],
+      "reject": [
+        "auto-failover will fail over the Analytics node",
+        "auto-failover protects the Analytics service"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-rebalance-progress",
+      "input": "How do I see how far along the rebalance is on the cluster and whether auto-failover is currently enabled?",
+      "expect": [
+        "cb-analytics-cluster",
+        "cluster-level",
+        "auto-failover",
+        "rebalance"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-cluster"
+    }
+  ]
+}

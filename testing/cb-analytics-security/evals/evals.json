@@ -1,0 +1,72 @@
+{
+  "skill": "cb-analytics-security",
+  "cases": [
+    {
+      "name": "create-a-service-account",
+      "input": "Create a least-privileged local Couchbase user for our Analytics automation to use.",
+      "expect": [
+        "upsert_user",
+        "domain=\"local\"",
+        "analytics_reader",
+        "analytics_select"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "role-spec-format",
+      "input": "How do I grant SELECT on just travel-sample.inventory to an Analytics user?",
+      "expect": [
+        "analytics_select[travel-sample:inventory]",
+        "comma-separated string"
+      ],
+      "reject": [],
+      "threshold": 1,
+      "tier": "standard"
+    },
+    {
+      "name": "unparameterised-roles",
+      "input": "Is roles=\"analytics_reader[*]\" the right way to give cluster-wide Analytics read?",
+      "expect": [
+        "not valid",
+        "takes no parameters",
+        "analytics_reader"
+      ],
+      "reject": [
+        "analytics_reader[*] is correct",
+        "yes, use analytics_reader[*]"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "group-membership-is-not-a-role",
+      "input": "How do I add a user to the analytics-readers group - is it roles=\"local:analytics-readers\"?",
+      "expect": [
+        "separate field",
+        "groups",
+        "--user-groups",
+        "not a role string"
+      ],
+      "reject": [
+        "roles=\"local:analytics-readers\" is correct"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-mcp-bearer-token",
+      "input": "Where do I set the bearer token Claude uses to authenticate to the MCP server itself?",
+      "expect": [
+        "cb-analytics-mcp-setup",
+        "MCP_API_KEY",
+        "env"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-mcp-setup"
+    }
+  ]
+}

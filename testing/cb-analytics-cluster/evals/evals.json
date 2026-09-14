@@ -1,0 +1,77 @@
+{
+  "skill": "cb-analytics-cluster",
+  "cases": [
+    {
+      "name": "check-cluster-reachable",
+      "input": "All my Analytics tools are timing out. How do I check the cluster is even reachable and who I'm authenticated as?",
+      "expect": [
+        "ping_cluster",
+        "who_am_i",
+        "get_cluster_info"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "smoke"
+    },
+    {
+      "name": "auto-failover-defaults",
+      "input": "What are the default auto-failover settings on a Couchbase cluster, and what's the valid range for the timeout?",
+      "expect": [
+        "120 seconds",
+        "5",
+        "3600",
+        "max_count",
+        "1"
+      ],
+      "reject": [
+        "default timeout is 30 seconds",
+        "default timeout is 60 seconds"
+      ],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "max-count-above-one-is-enterprise",
+      "input": "Can I set auto-failover max_count to 3 on our Community Edition cluster?",
+      "expect": [
+        "Enterprise",
+        "Community Edition is capped at 1",
+        "no"
+      ],
+      "reject": [
+        "yes, set max_count to 3 on Community Edition"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "auto-failover-does-not-cover-analytics",
+      "input": "We had an Analytics outage and auto-failover didn't kick in. Is auto-failover broken?",
+      "expect": [
+        "Data and Index services only",
+        "not",
+        "heartbeat",
+        "manual failover"
+      ],
+      "reject": [
+        "auto-failover monitors all services",
+        "this is a bug"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-kill-a-query",
+      "input": "One Analytics request has been running forever. How do I find it and abort it?",
+      "expect": [
+        "cb-analytics-admin",
+        "active queries",
+        "service-level"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-admin"
+    }
+  ]
+}

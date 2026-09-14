@@ -1,0 +1,79 @@
+{
+  "skill": "couchbase-observability",
+  "cases": [
+    {
+      "name": "scrape-couchbase-with-prometheus",
+      "input": "How do I scrape Couchbase with Prometheus, and what account should the scrape job use?",
+      "expect": [
+        "/metrics",
+        "external_stats_reader",
+        "prometheus_sd_config",
+        "18091"
+      ],
+      "reject": [
+        "Full Admin"
+      ],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "dashboards-broke-after-upgrade",
+      "input": "After upgrading to 8.0 half our Grafana panels are empty. What changed?",
+      "expect": [
+        "kv_vb_ht_memory_overhead",
+        "Get Miss Ratio",
+        "kv_ep_mem_high_wat_percent_ratio",
+        "deprecated"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "cache-miss-ratio-meaning",
+      "input": "Our Cache Miss Ratio panel is at 40%. Does that mean 40% of reads are going to disk?",
+      "expect": [
+        "Get Miss Ratio",
+        "key does not exist",
+        "not",
+        "RAM cache"
+      ],
+      "reject": [
+        "yes, 40% of reads are served from disk"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "no-published-thresholds",
+      "input": "What does Couchbase recommend as the alert threshold for resident ratio?",
+      "expect": [
+        "almost no alert thresholds",
+        "baseline",
+        "your own",
+        "workload"
+      ],
+      "reject": [
+        "Couchbase recommends alerting at 90%"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-cluster-is-slow",
+      "input": "The metrics look fine but KV latency is high and compaction seems to be hurting us. What do I tune?",
+      "expect": [
+        "bottleneck",
+        "disk",
+        "compaction",
+        "watermark"
+      ],
+      "reject": [
+        "add a Grafana panel"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-performance-tuning"
+    }
+  ]
+}

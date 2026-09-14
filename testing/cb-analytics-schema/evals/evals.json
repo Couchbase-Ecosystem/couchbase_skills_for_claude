@@ -1,0 +1,76 @@
+{
+  "skill": "cb-analytics-schema",
+  "cases": [
+    {
+      "name": "build-a-data-dictionary",
+      "input": "I need to document every Analytics dataset we have and what fields are in each one.",
+      "expect": [
+        "list_dataverses",
+        "list_datasets",
+        "infer_schema",
+        "COUNT(*)"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "interpret-presence-pct",
+      "input": "infer_schema says the age field has presence_pct 87 and types [int, str]. What does that tell me?",
+      "expect": [
+        "optional",
+        "heterogeneous",
+        "flag"
+      ],
+      "reject": [
+        "87% of the documents are corrupt"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "infer-schema-is-query-category",
+      "input": "I'm going to loop infer_schema over 300 datasets. Any reason not to just fire them off as fast as the read limit allows?",
+      "expect": [
+        "query",
+        "10/sec",
+        "SELECT",
+        "read"
+      ],
+      "reject": [
+        "infer_schema is a read-category tool"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "sample-size-cost",
+      "input": "Should I just set sample_size to 100000 on infer_schema so I definitely see every field?",
+      "expect": [
+        "scans",
+        "cost",
+        "100",
+        "starting point"
+      ],
+      "reject": [
+        "yes, a large sample_size is free"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "near-miss-write-the-aggregation",
+      "input": "Now write me a SQL++ query that groups those orders by region and sums the totals, with pagination.",
+      "expect": [
+        "cb-analytics-query",
+        "execute_query_readonly",
+        "execute_query_paginated",
+        "SQL++ queries"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-query"
+    }
+  ]
+}

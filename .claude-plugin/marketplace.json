@@ -1,0 +1,18 @@
+{
+  "name": "couchbase-skills",
+  "owner": {
+    "name": "Couchbase",
+    "email": "agent-plugins@couchbase.com",
+    "url": "https://www.couchbase.com"
+  },
+  "metadata": {
+    "description": "Couchbase marketplace for the Couchbase Skills for Claude plugin."
+  },
+  "plugins": [
+    {
+      "name": "couchbase-skills",
+      "source": "./",
+      "description": "Couchbase skills for coding agents. Thirty-one skills covering SQL++ tuning, data modeling, sizing, migration, Search and vector, AI applications, transactions, Eventing, XDCR, backup and restore, mobile and App Services, Capella, Kubernetes, security hardening, observability, performance tuning, upgrades, Magma, Analytics and the Couchbase MCP servers — grounded in a live cluster."
+    }
+  ]
+}

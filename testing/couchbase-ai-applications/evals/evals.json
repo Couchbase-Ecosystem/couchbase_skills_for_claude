@@ -1,0 +1,92 @@
+{
+  "skill": "couchbase-ai-applications",
+  "cases": [
+    {
+      "name": "build-a-rag-pipeline",
+      "input": "I want to build a RAG pipeline over our support tickets using Couchbase as the vector store. Where do I start?",
+      "expect": [
+        "index type",
+        "embedding",
+        "chunk",
+        "retrieval",
+        "same model at index time and query time"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "which-vector-index-type",
+      "input": "Hyperscale, Composite, or Search vector index - which one should I pick for 200 million embeddings with metadata filters?",
+      "expect": [
+        "Hyperscale",
+        "Composite",
+        "Search Vector Index",
+        "APPROX_VECTOR_DISTANCE",
+        "Index Service"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "hyperscale-is-enterprise-only",
+      "input": "We're on Couchbase Server 7.6 Community Edition. Can we use a Hyperscale Vector Index?",
+      "expect": [
+        "8.0",
+        "Enterprise",
+        "no",
+        "Search Vector Index"
+      ],
+      "reject": [
+        "yes, Hyperscale is available in Community Edition",
+        "Hyperscale is available in 7.6"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "hybrid-needs-the-search-index",
+      "input": "I need to combine a keyword match on the title with vector similarity in one query. Which index does that?",
+      "expect": [
+        "Search Vector Index",
+        "the only one",
+        "hybrid"
+      ],
+      "reject": [
+        "Composite Vector Index supports hybrid text",
+        "Hyperscale supports full-text"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-analyzer-choice",
+      "input": "My German product descriptions aren't matching on stemmed forms. Which analyzer should the Search index use?",
+      "expect": [
+        "couchbase-fts",
+        "Search index mechanics",
+        "analyzer",
+        "language"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-fts"
+    },
+    {
+      "name": "real-vector-retrieval-tool-names",
+      "input": "For RAG retrieval over MCP: what is the exact tool for a kNN search against a Search Vector Index, and the exact tool for SQL++ APPROX_VECTOR_DISTANCE retrieval?",
+      "expect": [
+        "run_fts_query",
+        "run_sql_plus_plus_query"
+      ],
+      "reject": [
+        "cb_fts_search",
+        "cb_query"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    }
+  ]
+}

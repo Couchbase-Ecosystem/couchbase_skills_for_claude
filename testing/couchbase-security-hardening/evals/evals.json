@@ -1,0 +1,77 @@
+{
+  "skill": "couchbase-security-hardening",
+  "cases": [
+    {
+      "name": "production-tls-posture",
+      "input": "What do I need to change to stop all plaintext traffic to our Couchbase cluster before a SOC 2 audit?",
+      "expect": [
+        "tlsv1.2",
+        "node-to-node encryption",
+        "strict",
+        "couchbases://"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "least-privilege-rbac",
+      "input": "How do I design least-privilege roles for six application service accounts on one cluster?",
+      "expect": [
+        "scope",
+        "collection",
+        "groups",
+        "dedicated service account"
+      ],
+      "reject": [
+        "give them Full Admin"
+      ],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "no-lockout-no-expiry",
+      "input": "The auditor wants account lockout after 5 failed logins and 90-day password expiry configured in Couchbase. How do I set those?",
+      "expect": [
+        "no",
+        "failed-attempt lockout",
+        "password expiry",
+        "8193",
+        "IdP"
+      ],
+      "reject": [
+        "set the lockout threshold to 5",
+        "configure password expiry to 90 days"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "tls-1-0-not-supported",
+      "input": "One legacy client only speaks TLS 1.1. Can I lower the minimum TLS version on a 7.6 cluster to accommodate it?",
+      "expect": [
+        "not supported on 7.6",
+        "tlsv1.2",
+        "no"
+      ],
+      "reject": [
+        "set the minimum TLS version to tlsv1.1"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-client-side-tls",
+      "input": "How do I configure the trust store and client certificate in my Java SDK connection so mTLS works?",
+      "expect": [
+        "couchbase-app-integration",
+        "client-certificate",
+        "SDK"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-app-integration"
+    }
+  ]
+}

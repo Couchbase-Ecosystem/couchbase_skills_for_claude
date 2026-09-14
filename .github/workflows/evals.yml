@@ -1,0 +1,43 @@
+name: evals
+
+# Executing evals bills real model calls, so this never gates a pull request.
+on:
+  workflow_dispatch:
+    inputs:
+      skill:
+        description: "Limit to one skill (blank = all)"
+        required: false
+      tier:
+        description: "Limit to one tier: smoke, standard or deep (blank = all)"
+        required: false
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the Anthropic SDK
+        run: pip install anthropic
+
+      - name: Run eval suites
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 tools/run-evals.py --execute \
+            --json eval-results.json \
+            --threshold 0.8 \
+            ${{ inputs.skill && format('--skill {0}', inputs.skill) || '' }} \
+            ${{ inputs.tier && format('--tier {0}', inputs.tier) || '' }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: eval-results.json

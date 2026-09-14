@@ -1,0 +1,24 @@
+{
+  "name": "couchbase-skills",
+  "version": "1.0.0",
+  "description": "Couchbase skills for Gemini CLI: operate a live Couchbase cluster or Capella deployment \u2014 SQL++, indexing, data modeling, sizing, XDCR, Eventing, mobile, Kubernetes, security hardening and Analytics \u2014 grounded in the cluster via the Couchbase MCP server.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "couchbase": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "couchbase-mcp-server>=1.0.0,<1.1.0",
+        "couchbase-mcp-server"
+      ],
+      "env": {
+        "CB_CONNECTION_STRING": "${CB_CONNECTION_STRING}",
+        "CB_USERNAME": "${CB_USERNAME}",
+        "CB_PASSWORD": "${CB_PASSWORD}",
+        "CB_MCP_READ_ONLY_MODE": "${CB_MCP_READ_ONLY_MODE:-true}",
+        "CB_MCP_DISABLED_TOOLS": "${CB_MCP_DISABLED_TOOLS}",
+        "CB_MCP_CONFIRMATION_REQUIRED_TOOLS": "${CB_MCP_CONFIRMATION_REQUIRED_TOOLS}"
+      }
+    }
+  }
+}

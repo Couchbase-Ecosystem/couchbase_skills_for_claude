@@ -1,0 +1,88 @@
+{
+  "skill": "cb-analytics-query",
+  "cases": [
+    {
+      "name": "pick-the-right-query-tool",
+      "input": "I need the first 20 rows of a dataset with about 40 million documents to eyeball the shape. Which Analytics query tool should I call?",
+      "expect": [
+        "execute_query_paginated",
+        "page_size",
+        "execute_query"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "smoke"
+    },
+    {
+      "name": "explain-a-slow-analytics-query",
+      "input": "This Analytics query takes 90 seconds. How do I find out what it's actually doing before I start adding indexes?",
+      "expect": [
+        "explain_query",
+        "plan",
+        "get_completed_requests",
+        "get_active_requests"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "no-at-plus-for-analytics",
+      "input": "Can I set scan_consistency to at_plus on an Analytics query so it sees my write?",
+      "expect": [
+        "not_bounded",
+        "request_plus",
+        "Query service",
+        "does not support"
+      ],
+      "reject": [
+        "at_plus is supported by Analytics",
+        "set scan_consistency=\"at_plus\""
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "truncated-must-be-surfaced",
+      "input": "The result came back with truncated: true and full_row_count 47832. Just give me the summary of the data.",
+      "expect": [
+        "truncated",
+        "do not silently",
+        "paginated",
+        "first 1000"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "near-miss-analytics-collection-is-not-a-bucket-collection",
+      "input": "My Analytics collection mirrors travel-sample.inventory.airline - are they the same object?",
+      "expect": [
+        "distinct object",
+        "mirror",
+        "not",
+        "own name"
+      ],
+      "reject": [
+        "they are the same object",
+        "an Analytics collection is a bucket collection"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-what-datasets-exist",
+      "input": "Before I write anything, what Analytics scopes and datasets exist on this cluster and what fields does each dataset have?",
+      "expect": [
+        "cb-analytics-schema",
+        "dataverses",
+        "field shapes"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-schema"
+    }
+  ]
+}

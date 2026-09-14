@@ -1,0 +1,77 @@
+{
+  "skill": "couchbase-coding-standards",
+  "cases": [
+    {
+      "name": "review-couchbase-code",
+      "input": "Review this service class: it opens a new Cluster object inside every request handler and builds the SQL++ WHERE clause by string formatting the user's search term.",
+      "expect": [
+        "connection lifecycle",
+        "parameterize",
+        "injection",
+        "named parameters"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "document-key-naming",
+      "input": "What naming convention should we use for document keys in a new Couchbase project?",
+      "expect": [
+        "self-describing",
+        "type",
+        "convention",
+        "key"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "never-assert-sdk-symbols-from-memory",
+      "input": "In my review comment, what's the exact exception class name for a CAS mismatch so I can tell the author to catch it?",
+      "expect": [
+        "CASMismatchException",
+        "CasMismatchException",
+        "SDK version",
+        "verify"
+      ],
+      "reject": [
+        "it is the same name in every SDK"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "gate-version-sensitive-review-comments",
+      "input": "Should a review comment just say 'use Magma here' for a new bucket creation helper?",
+      "expect": [
+        "Enterprise Edition",
+        "version",
+        "gate",
+        "8.0"
+      ],
+      "reject": [
+        "Magma is available in Community Edition"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-why-is-the-query-slow",
+      "input": "This query in our repository layer takes 4 seconds. The EXPLAIN shows a PrimaryScan even though there's an index on status.",
+      "expect": [
+        "leading key",
+        "index",
+        "EXPLAIN",
+        "covering"
+      ],
+      "reject": [
+        "rename the function"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-sqlpp-tuning"
+    }
+  ]
+}

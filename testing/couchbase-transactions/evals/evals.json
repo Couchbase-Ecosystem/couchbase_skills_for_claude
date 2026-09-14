@@ -1,0 +1,88 @@
+{
+  "skill": "couchbase-transactions",
+  "cases": [
+    {
+      "name": "atomic-multi-document-update",
+      "input": "I need to debit one account document and credit another atomically. How do I do that in Couchbase?",
+      "expect": [
+        "transaction",
+        "lambda",
+        "insert",
+        "replace",
+        "commit"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "sqlpp-vs-sdk-transactions",
+      "input": "What's the difference between BEGIN TRANSACTION in SQL++ and the SDK transactions API?",
+      "expect": [
+        "SQL++",
+        "ad-hoc",
+        "SDK",
+        "application code"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "document-size-limit-in-transactions",
+      "input": "Can a 15MB document take part in a transaction? The document limit is 20 MiB so it should be fine.",
+      "expect": [
+        "10 MB",
+        "under",
+        "no"
+      ],
+      "reject": [
+        "yes, up to 20 MiB works in a transaction"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "single-node-dev-cluster-durability",
+      "input": "My transactions fail with DurabilityImpossibleException on my laptop's single-node cluster. How do I fix it?",
+      "expect": [
+        "replica",
+        "0",
+        "rebalance",
+        "single-node"
+      ],
+      "reject": [
+        "set durability to NONE"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "cleanup-needs-a-running-app",
+      "input": "We shut the service down over the weekend. Will expired transactions get cleaned up in the meantime?",
+      "expect": [
+        "only runs while an application is running",
+        "not",
+        "cleanup"
+      ],
+      "reject": [
+        "the cluster cleans them up on its own"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-single-document-subdoc",
+      "input": "I just need to increment a counter field and append to an array inside one document. Which SDK call?",
+      "expect": [
+        "couchbase-app-integration",
+        "single-document operations",
+        "sub-document"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-app-integration"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "skill": "couchbase-magma",
+  "cases": [
+    {
+      "name": "magma-or-couchstore",
+      "input": "New bucket, about 4TB of data, and the hot set is maybe 5% of it. Magma or Couchstore?",
+      "expect": [
+        "Magma",
+        "working set",
+        "1%",
+        "3 TB"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "vbucket-count-decision",
+      "input": "128 or 1024 vBuckets for a Magma bucket that'll hold about 60GB?",
+      "expect": [
+        "128",
+        "100 MiB",
+        "1 GiB",
+        "fixed at bucket creation"
+      ],
+      "reject": [
+        "you can change the vBucket count later"
+      ],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "magma-is-enterprise-only",
+      "input": "Can we switch our Community Edition buckets to Magma to save memory?",
+      "expect": [
+        "Enterprise Edition only",
+        "Couchstore",
+        "no"
+      ],
+      "reject": [
+        "yes, Magma is available in Community Edition"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "migration-always-yields-1024",
+      "input": "On 8.0 EE, if I migrate an existing Couchstore bucket to Magma, do I end up with the 128 vBucket configuration?",
+      "expect": [
+        "1024",
+        "always",
+        "regardless"
+      ],
+      "reject": [
+        "you get 128 vBuckets",
+        "the vBucket count is preserved"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "no-compaction-time-window",
+      "input": "How do I confine Magma compaction to our 2am maintenance window?",
+      "expect": [
+        "does not apply to Magma",
+        "Couchstore",
+        "fragmentation"
+      ],
+      "reject": [
+        "set the compaction time interval for the Magma bucket"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-cluster-capacity-math",
+      "input": "How many nodes and how much total RAM do I need for a 4TB dataset with one replica?",
+      "expect": [
+        "couchbase-sizing",
+        "sizing formulas",
+        "working set",
+        "quota"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-sizing"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "skill": "couchbase-columnar",
+  "cases": [
+    {
+      "name": "what-happened-to-capella-columnar",
+      "input": "Our architecture doc says we're using Capella Columnar. Is that still a product?",
+      "expect": [
+        "rebranded",
+        "Capella Analytics",
+        "August 2025",
+        "retired"
+      ],
+      "reject": [
+        "Capella Columnar is the current product name",
+        "Capella Columnar is still the correct name"
+      ],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "standalone-vs-embedded",
+      "input": "Should I run analytical queries on the Analytics Service inside my operational cluster, or stand up a separate analytics cluster?",
+      "expect": [
+        "separate",
+        "isolation",
+        "object storage",
+        "operational"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "self-managed-name",
+      "input": "What's the self-managed, on-prem version of Capella Analytics called?",
+      "expect": [
+        "Couchbase Enterprise Analytics"
+      ],
+      "reject": [
+        "Capella Columnar on-prem",
+        "self-managed Capella Analytics"
+      ],
+      "threshold": 1,
+      "tier": "standard"
+    },
+    {
+      "name": "olap-not-oltp",
+      "input": "Can we just point the whole application at Capella Analytics and retire the operational cluster?",
+      "expect": [
+        "OLAP",
+        "not",
+        "operational cluster",
+        "transactional"
+      ],
+      "reject": [
+        "yes, retire the operational cluster"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-in-cluster-ingestion-health",
+      "input": "The cbas service on our Couchbase Server cluster has a link that looks stuck. How do I check its ingestion state?",
+      "expect": [
+        "cb-analytics",
+        "embedded Analytics Service",
+        "Analytics Service"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-admin"
+    }
+  ]
+}

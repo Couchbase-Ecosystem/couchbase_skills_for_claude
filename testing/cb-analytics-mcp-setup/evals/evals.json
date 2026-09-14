@@ -1,0 +1,78 @@
+{
+  "skill": "cb-analytics-mcp-setup",
+  "cases": [
+    {
+      "name": "first-run-config",
+      "input": "I just cloned cb-analytics-mcp. What's the minimum I have to put in .env before it will start?",
+      "expect": [
+        "MCP_API_KEY",
+        "32",
+        "CB_ANALYTICS_HOST",
+        "CB_ANALYTICS_PASSWORD",
+        "GUI_SESSION_SECRET"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "check-does-not-reach-the-cluster",
+      "input": "cb-analytics-mcp --check exits 0 but the dashboard says the cluster is unreachable. Is --check lying?",
+      "expect": [
+        "--check doesn't try to reach the cluster",
+        "Test Connection",
+        "ping_cluster"
+      ],
+      "reject": [
+        "--check verifies cluster connectivity"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "row-cap-default",
+      "input": "My SELECT keeps coming back with truncated: true. What's the default cap and should I just turn it off?",
+      "expect": [
+        "MAX_QUERY_ROWS",
+        "1000",
+        "execute_query_paginated",
+        "rarely the right call"
+      ],
+      "reject": [
+        "the default is 100 rows",
+        "the default is 10000 rows"
+      ],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "multi-cluster-mode",
+      "input": "We have prod, stage and dev Couchbase clusters. How do I point one MCP server at all three?",
+      "expect": [
+        "CB_ANALYTICS_CLUSTERS_FILE",
+        "JSON array",
+        "name",
+        "host"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "near-miss-grant-the-service-account-a-role",
+      "input": "What Couchbase role should the account the MCP server authenticates with actually hold?",
+      "expect": [
+        "cb-analytics-security",
+        "service account",
+        "least"
+      ],
+      "reject": [
+        "analytics_admin is the right choice",
+        "cluster_admin"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-security"
+    }
+  ]
+}

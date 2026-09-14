@@ -1,0 +1,34 @@
+name: validate-skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate skill structure and frontmatter
+        run: |
+          chmod +x tools/validate-skills.sh
+          ./tools/validate-skills.sh
+
+      - name: Validate eval suite schema (no API calls)
+        run: python3 tools/run-evals.py --dry-run
+
+      - name: Self-test the eval grader
+        run: python3 tools/run-evals.py --self-test
+
+      - name: Validate packaging manifests
+        run: python3 tools/validate-manifests.py
+
+      - name: Validate markdown links and anchors
+        run: python3 tools/validate-links.py

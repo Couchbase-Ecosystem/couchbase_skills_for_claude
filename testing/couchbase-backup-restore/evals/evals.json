@@ -1,0 +1,75 @@
+{
+  "skill": "couchbase-backup-restore",
+  "cases": [
+    {
+      "name": "restore-one-collection",
+      "input": "I need to restore just the inventory.airline collection from last Tuesday's backup, not the whole bucket.",
+      "expect": [
+        "cbbackupmgr",
+        "Enterprise",
+        "include",
+        "collection"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "full-vs-incremental",
+      "input": "What's the difference between a full and an incremental cbbackupmgr backup, and how many fulls should I keep?",
+      "expect": [
+        "incremental by default",
+        "first one is implicitly full",
+        "--full-backup",
+        "merge",
+        "chain"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "purge-does-not-delete-documents",
+      "input": "If I run cbbackupmgr restore with --purge, does that wipe the documents in the destination bucket first so I get an exact copy?",
+      "expect": [
+        "discard",
+        "progress",
+        "does not delete",
+        "additive"
+      ],
+      "reject": [
+        "--purge deletes documents from the destination",
+        "--purge wipes the destination bucket"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "backup-service-is-enterprise-only",
+      "input": "We're on Community Edition. Can I schedule backups from the Backup tab in the Web Console?",
+      "expect": [
+        "Enterprise Edition only",
+        "cbbackupmgr",
+        "no"
+      ],
+      "reject": [
+        "yes, the Backup Service is available in Community Edition"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-move-data-from-mongodb",
+      "input": "How do I get 400GB of data out of MongoDB and into a new Couchbase cluster?",
+      "expect": [
+        "couchbase-migration-execution",
+        "one-time migration",
+        "validate"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-migration-execution"
+    }
+  ]
+}

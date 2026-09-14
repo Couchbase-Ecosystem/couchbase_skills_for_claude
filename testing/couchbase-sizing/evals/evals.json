@@ -1,0 +1,77 @@
+{
+  "skill": "couchbase-sizing",
+  "cases": [
+    {
+      "name": "how-much-ram",
+      "input": "600 million documents, average 1.2KB, 30% working set, one replica. How much cluster RAM quota do I need?",
+      "expect": [
+        "56 bytes",
+        "ID size",
+        "no_of_copies",
+        "85%",
+        "25%"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "scale-up-or-out",
+      "input": "Should I go with three big nodes or seven smaller ones for a write-heavy workload?",
+      "expect": [
+        "scale out",
+        "fault tolerance",
+        "write-heavy",
+        "node failure"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "replicas-do-not-serve-reads",
+      "input": "We're read-bound. If I add a second replica, does that give us more read throughput?",
+      "expect": [
+        "do not",
+        "active vBucket",
+        "availability",
+        "sizing error"
+      ],
+      "reject": [
+        "yes, replicas serve reads",
+        "adding a replica increases read throughput"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "storage-engine-memory-ratios",
+      "input": "What minimum memory quota should I budget as a fraction of dataset size for Couchstore vs Magma?",
+      "expect": [
+        "10%",
+        "1%",
+        "Enterprise Edition"
+      ],
+      "reject": [
+        "both need 10%"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-document-shape",
+      "input": "Would it be better to split each 900KB product document into a summary doc plus a details doc?",
+      "expect": [
+        "couchbase-data-modeling",
+        "embedding vs reference",
+        "document size"
+      ],
+      "reject": [
+        "RAM quota formula"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-data-modeling"
+    }
+  ]
+}

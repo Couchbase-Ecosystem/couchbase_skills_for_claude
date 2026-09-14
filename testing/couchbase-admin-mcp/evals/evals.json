@@ -1,0 +1,78 @@
+{
+  "skill": "couchbase-admin-mcp",
+  "cases": [
+    {
+      "name": "create-a-bucket",
+      "input": "Create a 4GB bucket called orders on the prod cluster through the admin MCP server.",
+      "expect": [
+        "cb_mcp_status",
+        "dry_run",
+        "read-only",
+        "confirm"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "remove-a-node-and-rebalance",
+      "input": "I need to take node 3 out of the cluster and rebalance. Walk me through it with the admin MCP tools.",
+      "expect": [
+        "destructive",
+        "dry_run",
+        "one change at a time",
+        "explicit",
+        "rebalance"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "standard"
+    },
+    {
+      "name": "read-only-is-the-default",
+      "input": "The bucket create tool doesn't show up in the tool list. Is the admin MCP server broken?",
+      "expect": [
+        "CB_ADMIN_READ_ONLY_MODE",
+        "true",
+        "not loaded",
+        "read-only"
+      ],
+      "reject": [
+        "the server is broken",
+        "the tool is missing due to a bug",
+        "defaults to false"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "dry-run-env-var-wins",
+      "input": "I passed dry_run: false but it still only previewed the change. How do I force it through?",
+      "expect": [
+        "CB_ADMIN_DRY_RUN",
+        "environment variable wins",
+        "cannot escape"
+      ],
+      "reject": [
+        "pass dry_run: false again",
+        "set dry_run to false to override"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-read-documents-and-sqlpp",
+      "input": "Read document user::42 out of travel-sample and then run a SQL++ query against the airline collection.",
+      "expect": [
+        "data-plane",
+        "couchbase-mcp",
+        "get_document_by_id",
+        "run_sql_plus_plus_query"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-mcp"
+    }
+  ]
+}

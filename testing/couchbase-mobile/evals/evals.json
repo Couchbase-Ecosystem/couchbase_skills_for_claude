@@ -1,0 +1,77 @@
+{
+  "skill": "couchbase-mobile",
+  "cases": [
+    {
+      "name": "offline-first-ios-app",
+      "input": "I'm building an iOS field-service app that has to work with no signal and sync when it reconnects. What's the Couchbase stack?",
+      "expect": [
+        "Couchbase Lite",
+        "Sync Gateway",
+        "App Services",
+        "replicator"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "per-user-document-access",
+      "input": "How do I make sure a technician only sees the work orders assigned to them?",
+      "expect": [
+        "channel",
+        "sync function",
+        "Access Control and Data Validation"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "app-services-has-no-rollback",
+      "input": "We're scheduling the App Services upgrade on Capella. If the app breaks after it, how do we roll back to the previous version?",
+      "expect": [
+        "no documented downgrade",
+        "one-way",
+        "defer",
+        "backup"
+      ],
+      "reject": [
+        "roll back through the Capella UI",
+        "Capella App Services supports rollback"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "conflict-default-changed-in-4",
+      "input": "What does Couchbase Lite do by default when two devices edit the same document offline?",
+      "expect": [
+        "version vectors",
+        "last-write-wins",
+        "hybrid logical clock",
+        "4.0"
+      ],
+      "reject": [
+        "most active wins is the default in 4.0",
+        "revision trees are still the default"
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-cluster-to-cluster-replication",
+      "input": "How do I replicate a bucket from our EU Couchbase cluster to our US cluster with conflict logging?",
+      "expect": [
+        "XDCR",
+        "replication",
+        "conflict"
+      ],
+      "reject": [
+        "Sync Gateway channel"
+      ],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "couchbase-xdcr"
+    }
+  ]
+}

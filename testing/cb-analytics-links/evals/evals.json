@@ -1,0 +1,77 @@
+{
+  "skill": "cb-analytics-links",
+  "cases": [
+    {
+      "name": "create-an-s3-link",
+      "input": "I want to query a bucket of JSON files in S3 from Analytics. How do I wire that up?",
+      "expect": [
+        "create_link",
+        "\"type\": \"s3\"",
+        "region",
+        "accessKeyId",
+        "list_links"
+      ],
+      "reject": [],
+      "threshold": 3,
+      "tier": "smoke"
+    },
+    {
+      "name": "rotate-link-credentials",
+      "input": "Our S3 access key is being rotated next week. What do I do to the Analytics link without breaking the datasets on it?",
+      "expect": [
+        "update_link",
+        "without recreating",
+        "delete"
+      ],
+      "reject": [
+        "delete the link and create it again"
+      ],
+      "threshold": 2,
+      "tier": "standard"
+    },
+    {
+      "name": "iceberg-is-enterprise-analytics-only",
+      "input": "Can I read Apache Iceberg tables from Capella Analytics?",
+      "expect": [
+        "not documented",
+        "Enterprise Analytics",
+        "2.2"
+      ],
+      "reject": [
+        "yes, Capella Analytics supports Iceberg"
+      ],
+      "threshold": 2,
+      "tier": "deep"
+    },
+    {
+      "name": "no-first-party-cdc-link",
+      "input": "I need CDC from my PostgreSQL database into Analytics. Which link type do I use?",
+      "expect": [
+        "no first-party",
+        "Kafka",
+        "Oracle",
+        "SQL Server",
+        "not a Couchbase-supported source"
+      ],
+      "reject": [
+        "use the cdc link type",
+        "\"type\": \"cdc\""
+      ],
+      "threshold": 3,
+      "tier": "deep"
+    },
+    {
+      "name": "near-miss-what-fields-are-in-the-dataset",
+      "input": "Now that the S3 link is up and the dataset is loading, what fields do the documents in it actually have?",
+      "expect": [
+        "cb-analytics-schema",
+        "field shapes",
+        "datasets exist"
+      ],
+      "reject": [],
+      "threshold": 2,
+      "tier": "standard",
+      "expect_skill": "cb-analytics-schema"
+    }
+  ]
+}
