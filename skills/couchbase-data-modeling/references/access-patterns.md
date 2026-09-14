@@ -67,7 +67,7 @@ CREATE INDEX ix_user_tags ON users(DISTINCT ARRAY t FOR t IN tags END);
 SELECT META().id FROM users WHERE ANY t IN tags SATISFIES t = "premium" END;
 ```
 
-Modeling consequence worth knowing up front: `ANY ... SATISFIES` works against either a `DISTINCT ARRAY` or an `ALL ARRAY` index, but **`UNNEST` requires an `ALL ARRAY` index**, and bare `EVERY` cannot use an array index at all. If your access pattern involves flattening the array into rows, model for `ALL ARRAY`.
+Modeling consequence worth knowing up front: `ANY ... SATISFIES` works against either a `DISTINCT ARRAY` or an `ALL ARRAY` index. `UNNEST` works against either as well, but only `ALL ARRAY` can **cover** it — `UNNEST` emits one row per element without de-duplicating, and a `DISTINCT` index has already collapsed duplicates, so the plan has to fetch the document to re-unnest it. Bare `EVERY` cannot use an array index at all. If your access pattern flattens the array into rows and you want to avoid the fetch, model for `ALL ARRAY`.
 
 Cost: array indexes are larger and slower to update than scalar indexes. Use them only if you'll actually query by array contents.
 

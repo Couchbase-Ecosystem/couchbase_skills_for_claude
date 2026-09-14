@@ -35,6 +35,24 @@ This repository is itself the plugin and the marketplace source.
 
 After installing, connect to your cluster by setting `CB_CONNECTION_STRING`, `CB_USERNAME` and `CB_PASSWORD`. The bundled MCP server configuration (`mcp.json`) runs read-only by default; see [`skills/couchbase-mcp/`](skills/couchbase-mcp/) for the full configuration surface.
 
+### Migrating from the previous layout
+
+Skills used to sit in two groups, `skills/couchbase/` and `skills/couchbase-analytics/`. They are now all one level down, at `skills/<skill-name>/`.
+
+The layout changed because the Agent Skills specification, this repository's validators and every plugin manifest resolve skills exactly one level under `skills/` — a grouped tree is silently discovered as zero skills rather than failing loudly. The group names had also stopped carrying information: the `cb-analytics-*` prefix already says what the analytics directory used to.
+
+If you imported a skill by path, drop the group segment:
+
+```diff
+- @skills/couchbase/couchbase-sqlpp-tuning/SKILL.md
++ @skills/couchbase-sqlpp-tuning/SKILL.md
+
+- @skills/couchbase-analytics/cb-analytics-query/SKILL.md
++ @skills/cb-analytics-query/SKILL.md
+```
+
+Skill names themselves are unchanged, so anything that refers to a skill by name rather than by path still works.
+
 ### Without a plugin host
 
 Copy the skill directories you want into your project's `.claude/skills/`, or paste a `SKILL.md` into a Claude Project's knowledge. Each skill is self-contained; the `references/` files load on demand only when the agent is told to read them.

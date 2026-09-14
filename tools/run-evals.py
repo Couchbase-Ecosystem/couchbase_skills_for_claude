@@ -239,8 +239,10 @@ def validate_suite(path: Path, skills: set[str]) -> list[str]:
 def cmd_dry_run(quiet: bool = False) -> int:
     suites = discover_suites()
     if not suites:
-        print("No eval suites found under testing/*/evals/evals.json")
-        return 0
+        # Finding nothing is a failure, not a pass: a moved or regrouped tree
+        # would otherwise report success while validating nothing.
+        print("FAIL no eval suites found under testing/*/evals/evals.json")
+        return 1
 
     skills = known_skills()
     all_errors: list[str] = []

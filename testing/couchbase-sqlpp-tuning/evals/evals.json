@@ -30,17 +30,19 @@
       "tier": "standard"
     },
     {
-      "name": "unnest-needs-all-array",
-      "input": "My UNNEST query isn't using the array index I created with DISTINCT ARRAY. Why not?",
+      "name": "unnest-distinct-array-is-used-but-not-covered",
+      "input": "My UNNEST query uses the array index I created with DISTINCT ARRAY, but the plan still shows a Fetch. Why, and what should I change?",
       "expect": [
         "ALL ARRAY",
-        "DISTINCT ARRAY"
+        "cover",
+        "Fetch",
+        "duplicate"
       ],
       "reject": [
-        "DISTINCT ARRAY works for UNNEST",
-        "recreate it as a DISTINCT ARRAY index"
+        "DISTINCT ARRAY cannot be used",
+        "UNNEST can only use an ALL ARRAY index"
       ],
-      "threshold": 2,
+      "threshold": 3,
       "tier": "deep"
     },
     {

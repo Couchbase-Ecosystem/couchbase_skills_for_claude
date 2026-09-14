@@ -22,7 +22,7 @@ Choosing the right index type is most of the tuning work. Once the right index e
 | **Secondary (GSI)** | Default. Equality or range predicate on one or more fields. | `CREATE INDEX idx ON keyspace(field1, field2);` |
 | **Covering** | Hot read query. Avoids the Fetch round-trip. | Same as secondary, but containing every projected and filtered field. |
 | **Partial** | Only a fraction of documents are ever queried. | `CREATE INDEX idx ON keyspace(field) WHERE type = 'X';` |
-| **Array** | Predicates against array elements (`ANY`, `UNNEST`). | `CREATE INDEX idx ON keyspace(ALL ARRAY v.field FOR v IN arr END);` |
+| **Array** | Predicates against array elements (`ANY`, `UNNEST`). `ALL` covers `UNNEST`; `DISTINCT` is smaller and suits `ANY`. | `CREATE INDEX idx ON keyspace(ALL ARRAY v.field FOR v IN arr END);` |
 | **Composite** | Multiple equality/range predicates. | `CREATE INDEX idx ON keyspace(f1, f2, f3);` order matters. |
 | **Functional** | Predicate on a computed expression. | `CREATE INDEX idx ON keyspace(LOWER(name));` |
 | **Primary** | Almost never in production. | `CREATE PRIMARY INDEX ON keyspace;` |
@@ -98,23 +98,31 @@ This table is the whole game:
 | Query operator | Can use an array index | Can be covered |
 |---|---|---|
 | `ANY ... SATISFIES` | Yes — `DISTINCT ARRAY` or `ALL ARRAY` | Yes, either |
-| `UNNEST` | **`ALL ARRAY` only** | `ALL ARRAY` only |
+| `UNNEST` | Yes — either, but the array key must be the **leading** index key | `ALL ARRAY` (see below for the `DISTINCT` exception) |
 | `ANY AND EVERY` | Yes — either | Yes, either |
 | `EVERY` | **No** | No |
 
-`DISTINCT ARRAY` indexes only the unique elements of the array; `ALL ARRAY` indexes every element including duplicates. That is exactly why UNNEST needs `ALL ARRAY` — it has to be able to reconstruct the whole array, and a DISTINCT index has thrown duplicates away.
+`DISTINCT ARRAY` indexes only the unique elements of the array; `ALL ARRAY` indexes every element including duplicates.
+
+**The distinction for `UNNEST` is coverage, not usability — this is widely got wrong.** `UNNEST` does not de-duplicate: it emits one row per array element, duplicates included. A `DISTINCT ARRAY` index has already collapsed duplicates within each document, so it no longer holds enough information to produce those rows. The query still uses the index — the planner selects it and pushes the element predicate down as an exact span — but it wraps the scan in a `DistinctScan` and must **Fetch** each candidate document to re-unnest the array. With `ALL ARRAY` the index entries map one-to-one onto the unnested rows, so the scan can be covered outright, provided every field the query references is in the index.
+
+The aggregation case is the exception worth knowing: where the query itself de-duplicates, a `DISTINCT ARRAY` index can avoid the fetch, because the duplicates it discarded were never going to affect the result.
+
+The documentation's own summary table says "only ALL" for `UNNEST`, but Example 11 on the same page contradicts it: Query B is titled "UNNEST **not covered** when using the DISTINCT index", and the plan it prints shows an `IndexScan3` on that DISTINCT index with `"exact": true` spans. Not covered is not the same as not used. Example 9 Query C goes further, covering an `UNNEST` with a `DISTINCT` index by including the whole array as a second index key.
 
 ```sql
--- Serves ANY ... SATISFIES; will NOT serve UNNEST
+-- Serves ANY ... SATISFIES. Also serves UNNEST, but cannot cover it:
+-- expect a DistinctScan plus a Fetch.
 CREATE INDEX idx_sched_day_distinct
 ON route(DISTINCT ARRAY v.day FOR v IN schedule END);
 
--- Serves both ANY ... SATISFIES and UNNEST
+-- Serves both, and can cover UNNEST when the index holds every field
+-- the query touches.
 CREATE INDEX idx_sched_day_all
 ON route(ALL ARRAY v.day FOR v IN schedule END);
 ```
 
-Pick `DISTINCT ARRAY` when the array holds many repeated values and you only ever use `ANY`; pick `ALL ARRAY` when you use `UNNEST`, or when you want the option later.
+Pick `DISTINCT ARRAY` when the array holds many repeated values and you only ever use `ANY` — it is smaller and cheaper to maintain. Pick `ALL ARRAY` when you `UNNEST` and want the fetch gone.
 
 ### Rule 2: the UNNEST alias does not have to match the index binding
 
@@ -129,7 +137,7 @@ SELECT r.id FROM route r UNNEST r.schedule v WHERE v.flight LIKE 'UA%';
 SELECT r.id FROM route r UNNEST r.schedule s WHERE s.flight LIKE 'UA%';
 ```
 
-If an UNNEST query isn't using your array index, look at `DISTINCT` vs `ALL` first — that is almost always the actual cause.
+If an UNNEST query isn't using your array index at all, check **leading-key position first** — the array key has to lead. `DISTINCT` versus `ALL` decides whether the scan can be covered, not whether the index is used, so it is the wrong thing to look at when the index is being ignored entirely.
 
 ### Rule 3: direct array-element access is not an array predicate
 

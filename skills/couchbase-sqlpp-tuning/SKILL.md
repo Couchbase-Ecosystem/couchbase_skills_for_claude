@@ -53,7 +53,7 @@ These are the headline rules. Read them before diving into references.
 
 5. **Don't index a low-cardinality field like `docType` alone.** It invites IntersectScans and wrong plans. Use it as a partial-index predicate (`WHERE docType = 'X'`) so it gates the index instead of leading it.
 
-6. **Match the query shape to the index shape for arrays.** `ANY ... SATISFIES` works with either `DISTINCT ARRAY` or `ALL ARRAY` indexes. `UNNEST` requires an **`ALL ARRAY`** index — a `DISTINCT ARRAY` index will not serve it. Bare `EVERY` has no array-index support at all. (The UNNEST alias does *not* have to match the index's binding variable — that restriction was lifted in 6.5.)
+6. **Match the query shape to the index shape for arrays.** `ANY ... SATISFIES` works with either `DISTINCT ARRAY` or `ALL ARRAY`. `UNNEST` works with either too, but only `ALL ARRAY` can cover it — a `DISTINCT` index forces a `DistinctScan` plus a Fetch, because `UNNEST` does not de-duplicate and a DISTINCT index has already dropped the duplicates. For `UNNEST` the hard requirement is that the array key leads the index.
 
 7. **Avoid PrimaryScan in production**, but know that dropping the primary index is no longer a hard stop: **7.6+** added RBAC-controlled *sequential scans*, so a query with no usable index can still run by scanning the Data service. Either way, an unindexed scan is a full-keyspace read — find it and index it.
 
@@ -111,7 +111,7 @@ Quick scan list — if you see any of these, jump to `references/query-patterns.
 - `WHERE NOT (...)`, `!=`, `NOT IN` predicates (often not sargable)
 - `OR` across different fields (often forces IntersectScan / UnionScan, or no index at all)
 - `EVERY x IN arr SATISFIES ... END` (no array-index support — use `ANY` or `ANY AND EVERY`)
-- `UNNEST` against a `DISTINCT ARRAY` index (UNNEST needs `ALL ARRAY`)
+- `UNNEST` against a `DISTINCT ARRAY` index — it works, but never covers; expect a Fetch
 - `LIMIT 10 OFFSET 1000000` (deep pagination — use keyset pagination)
 - Raw user input concatenated into the statement (injection, and it can't be prepared)
 - A query that runs thousands of times per second with no `PREPARE`

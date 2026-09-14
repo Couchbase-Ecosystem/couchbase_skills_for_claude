@@ -143,7 +143,14 @@ def check_readme() -> None:
             fail(f"README.md: does not mention skills/{name}")
     # Reverse direction: a README row for a skill nobody can install is worse
     # than a missing row, because it advertises something that does not exist.
-    for name in sorted(set(re.findall(r"skills/([a-z0-9][a-z0-9-]*)/", text)) - present):
+    #
+    # Only real markdown links count. Fenced blocks and inline code are
+    # excluded, because the migration note deliberately shows the old
+    # pre-flattening paths as illustrations of what to change.
+    prose = re.sub(r"^```.*?^```", "", text, flags=re.S | re.M)
+    prose = re.sub(r"`[^`]*`", "", prose)
+    linked = set(re.findall(r"\]\(skills/([a-z0-9][a-z0-9-]*)/", prose))
+    for name in sorted(linked - present):
         fail(f"README.md: links skills/{name}, which does not exist")
 
 

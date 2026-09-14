@@ -28,6 +28,19 @@
 
 set -uo pipefail
 
+# Portability note: this script deliberately uses no `find` and no `sort`.
+# On Windows, a bash launched without -l inherits the Windows PATH, where
+# C:\Windows\System32\find.exe and sort.exe shadow the GNU tools. Windows'
+# find.exe does not understand these arguments and blocks reading stdin, so
+# the script would hang rather than fail. Shell globbing has no such problem.
+shopt -s nullglob
+if ((BASH_VERSINFO[0] >= 4)); then
+  shopt -s globstar
+  HAVE_GLOBSTAR=1
+else
+  HAVE_GLOBSTAR=0
+fi
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILLS_DIR="${1:-$REPO_ROOT/skills}"
 
@@ -128,20 +141,33 @@ for skill_md in "$SKILLS_DIR"/*/SKILL.md; do
   fi
 
   # --- exactly one SKILL.md ------------------------------------------------
-  nested="$(find "$skill_path" -mindepth 2 -name SKILL.md | wc -l | xargs)"
-  if (( nested > 0 )); then
-    say_fail "$dir" "found $nested nested SKILL.md file(s); a skill must contain exactly one"
+  if (( HAVE_GLOBSTAR )); then
+    nested=0
+    for candidate in "$skill_path"/**/SKILL.md; do
+      [[ "$candidate" == "$skill_md" ]] || nested=$((nested + 1))
+    done
+    if (( nested > 0 )); then
+      say_fail "$dir" "found $nested nested SKILL.md file(s); a skill must contain exactly one"
+    fi
   fi
 
   # --- references ----------------------------------------------------------
   if [[ -d "$skill_path/references" ]]; then
-    ref_count="$(find "$skill_path/references" -maxdepth 1 -name '*.md' | wc -l | xargs)"
+    ref_count=0
+    for ref in "$skill_path"/references/*.md; do
+      ref_count=$((ref_count + 1))
+    done
     if (( ref_count == 0 )); then
       say_fail "$dir" "references/ exists but contains no .md files — remove the empty directory"
     fi
-    deep="$(find "$skill_path/references" -mindepth 2 -name '*.md' | wc -l | xargs)"
-    if (( deep > 0 )); then
-      say_fail "$dir" "references/ must be one level deep; found $deep nested file(s)"
+    if (( HAVE_GLOBSTAR )); then
+      deep=0
+      for nested_ref in "$skill_path"/references/*/**/*.md "$skill_path"/references/*/*.md; do
+        deep=$((deep + 1))
+      done
+      if (( deep > 0 )); then
+        say_fail "$dir" "references/ must be one level deep; found $deep nested file(s)"
+      fi
     fi
     for ref in "$skill_path"/references/*.md; do
       [[ -e "$ref" ]] || continue
@@ -162,6 +188,17 @@ for skill_md in "$SKILLS_DIR"/*/SKILL.md; do
     say_fail "$dir" "personal branding or MIT licensing language found in: $offenders"
   fi
 done
+
+# Finding nothing is a failure, not a pass. Skills resolve exactly one level
+# under skills/; a grouped tree (skills/<group>/<name>/SKILL.md) matches the
+# glob zero times, and without this check the run would report success while
+# validating nothing at all.
+if (( count == 0 )); then
+  echo "FAIL no skills found under $SKILLS_DIR"
+  echo "     Each skill must be at skills/<skill-name>/SKILL.md, one level down."
+  echo "     A grouped tree such as skills/<group>/<skill-name>/SKILL.md is not discovered."
+  exit 1
+fi
 
 echo "Validated $count skill(s): $fail failure(s), $warn warning(s)."
 [[ $fail -eq 0 ]] || exit 1

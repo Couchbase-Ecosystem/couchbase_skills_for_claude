@@ -186,21 +186,29 @@ Note the semantic difference: `EVERY` evaluates to true on empty arrays, `ANY AN
 
 ## 9. UNNEST not using the array index
 
-Symptom: an `UNNEST` query doesn't use the array index you built for it.
+Symptom: an `UNNEST` query ignores the array index you built for it, or uses it but still shows a `Fetch` you did not expect.
 
-Cause: the index is a `DISTINCT ARRAY` index. **`UNNEST` can only use an `ALL ARRAY` index.** A DISTINCT index stores only unique elements, so it cannot reconstruct the array that UNNEST needs.
+**Two different problems, and they have different causes.**
+
+*The index is ignored entirely.* The usual cause is leading-key position: for an `UNNEST` scan to use an array index, the array key must be the **leading** index key. `ANY ... SATISFIES` has no such requirement, which is why an index that serves `ANY` can be skipped by `UNNEST`.
+
+*The index is used but the plan still fetches.* That is a `DISTINCT ARRAY` index, and it is working as designed. `UNNEST` does not de-duplicate — it emits one row per element, duplicates included — while a `DISTINCT` index has already collapsed duplicates within each document. It no longer holds what the query needs, so the planner wraps the scan in a `DistinctScan` and fetches each candidate document to re-unnest the array. Switch to `ALL ARRAY` to lose the fetch, provided the index also holds every field the query references.
 
 ```sql
--- Does NOT serve UNNEST
+-- Serves UNNEST, but cannot cover it: DistinctScan + Fetch
 CREATE INDEX idx_unnest_flight_distinct
 ON route(DISTINCT ARRAY v.flight FOR v IN schedule END);
 
--- Serves UNNEST (and ANY ... SATISFIES too)
+-- Serves UNNEST and can cover it
 CREATE INDEX idx_unnest_flight_all
 ON route(ALL ARRAY v.flight FOR v IN schedule END);
 
 SELECT r.id FROM route r UNNEST r.schedule s WHERE s.flight LIKE 'UA%';
 ```
+
+Where the query itself aggregates and de-duplicates, a `DISTINCT` index can avoid the fetch after all — the duplicates it dropped could not have changed the answer.
+
+The documentation's summary table on [Array Indexing](https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/indexing-arrays.html) says `UNNEST` works with "only ALL". Example 11 on that same page shows otherwise — Query B, "UNNEST not covered when using the DISTINCT index", prints a plan with an `IndexScan3` on the DISTINCT index and `"exact": true` spans. Read the table as "ALL is what you want", not as a capability limit.
 
 **Not the cause:** a mismatch between the UNNEST alias and the index's binding variable. Since **Couchbase Server 6.5** the alias can be anything — `s` above works fine against an index defined with `v`. If you have seen advice to rename the alias to match, it predates 6.5.
 

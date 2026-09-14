@@ -105,7 +105,7 @@ Substring grading is blunt on purpose: cheap, deterministic, and reviewable in a
 ## Adding a skill
 
 1. Pick a name. Lowercase, hyphenated, `couchbase-` prefixed, and specific — `couchbase-xdcr`, not `couchbase-replication-helper`.
-2. `mkdir -p skills/<name>` and write `SKILL.md` with the frontmatter and body shape from [`CONTRIBUTING.md`](CONTRIBUTING.md).
+2. `mkdir -p skills/<name>` — **directly under `skills/`, never in a subgroup.** The specification, the validators and every plugin manifest resolve skills exactly one level down; a grouped tree is discovered as zero skills and passes silently. Group in the `README.md` table instead, which costs nothing. Write `SKILL.md` with the frontmatter and body shape from [`CONTRIBUTING.md`](CONTRIBUTING.md).
 3. Add `references/*.md` only once the body would otherwise pass roughly 150 lines of depth. Do not create an empty `references/` directory.
 4. Add a `## Related skills` section, and add a reciprocal line to any sibling whose scope now abuts this one.
 5. Add the skill to the table in `README.md`.
