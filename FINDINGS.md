@@ -48,6 +48,29 @@ Both files now exist, but neither is an org-ratified template — no Couchbase s
 
 Couchbase's Gerrit-based CLA applies to SDK and server repositories. Newer GitHub-native repositories, including `couchbase/mcp-server-couchbase`, use plain pull requests with no CLA mention. `CONTRIBUTING.md` here assumes the GitHub-native model. Confirm with Legal before the repository takes outside contributions.
 
+
+### D7 — Behavioural testing needs a funding decision
+
+**Owner: whoever approves recurring spend for this repository, not the maintainer.**
+
+The repository ships 171 eval cases across all 31 skills. They are schema-valid, every `expect` string is reachable from the skill it tests, and many are regression pins on specific errors that were found and corrected. **None has ever been run against a model.** Nothing in CI grades a real answer, and no `ANTHROPIC_API_KEY` secret exists for the repository.
+
+That is a deliberate state, not an oversight. An executing job was built, measured, and then removed rather than left to fail on a schedule for a missing secret.
+
+**What it costs, measured rather than estimated.** A full pass is 171 cases at roughly 2.0M input tokens and 0.1M output tokens, because each case loads the skill under test plus its linked references as the system prompt. At Sonnet-class list pricing that is about **$7.45 per run**:
+
+| Cadence | Annual cost | What it buys |
+|---|---|---|
+| Weekly | ~$390 | A regression in a skill surfaces within days |
+| Monthly | ~$90 | Drift is caught within a release cycle |
+| Per release | ~$30 at four releases a year | Nothing ships unverified, nothing runs in between |
+| None (current) | $0 | The cases are documentation; nothing verifies behaviour |
+
+**What the free gates already cover, so the ask is scoped honestly.** Every push and pull request runs five structural checks: specification compliance and frontmatter, eval-suite schema, grader self-test, packaging manifests, and markdown links and anchors. Those catch a malformed skill, a broken reference, a drifted manifest and a self-defeating eval case. They cannot catch a skill that is well-formed and *wrong* — which is the failure mode that matters most here, because these skills are read as authoritative and the underlying products ship on their own cadences.
+
+**The risk of leaving it at zero.** The content verification pass of 2026-09-14 found errors in the majority of skills, including several that would have caused real damage if followed. Those are fixed and pinned, but the pins are inert until something runs them. A skill that silently rots between reviews looks identical to one that is correct.
+
+**Needs:** a yes or no on funding, and if yes a cadence. On a yes: add `ANTHROPIC_API_KEY` as a repository secret and restore a workflow calling `tools/run-evals.py --execute --json results.json --threshold 0.8`; run it manually once first, because the 0.8 floor has never been calibrated against a real pass rate. On a no: the `OWNERS.yaml` review cadence (D4) becomes the only thing standing between the collection and drift, which makes assigning real DRIs more urgent rather than less.
 ---
 
 ## Unverifiable claims
@@ -107,9 +130,6 @@ Couchbase's Gerrit-based CLA applies to SDK and server repositories. Newer GitHu
 ### Tooling
 
 - **Eval grading is substring matching.** `tools/run-evals.py --execute` is implemented against the Messages API: each case is one stateless request with the skill's `SKILL.md` and its linked references as the system prompt, graded by case-insensitive substring match. That is cheap, deterministic and reviewable, and it cannot distinguish a claim from its negation — which is why a `reject` string must be one only a wrong answer produces. If the org wants semantic grading, `claude plugin eval` offers an `llm` grader, but its case format differs from the one here and the suites would need restructuring.
-- **No eval has ever actually been executed against a model.** The 171 cases are schema-valid and their `expect` strings are all reachable from the skill each one tests, but nothing has graded a real answer. The measured cost of a full pass is ~2M input tokens, about **$7 at Sonnet-class pricing**; a weekly job would have been ~$390/year. Nobody had agreed to fund that, and no `ANTHROPIC_API_KEY` secret exists for the repository, so the executing CI job was removed rather than left to fail every week. `tools/run-evals.py --execute` remains as a local tool for anyone with their own key.
-
-  **Needs:** a decision on whether behavioural testing is worth funding. If it is, add the secret and restore a scheduled workflow; if it is not, the eval cases still earn their place as executable documentation of what each skill must say, and the free schema gate still keeps them honest.
 - **An uncovered skill can merge.** The schema gate warns, rather than fails, when a skill has no eval suite. Making it a failure is a one-line change; it was left as a warning so the gate does not block a legitimate work-in-progress branch. Decide which behaviour the org wants.
 
 ---
