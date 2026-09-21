@@ -124,7 +124,7 @@ AGENTS.md  GEMINI.md                             # agent context files
 BUILD.md                                         # the build and verification process
 CONTRIBUTING.md                                  # how to change a skill
 CODE_OF_CONDUCT.md  SECURITY.md                  # community and vulnerability-reporting policy
-.github/workflows/                               # validate-skills (the gates) and evals (manual/scheduled)
+.github/workflows/validate-skills.yml            # the gates, on every push and pull request
 FINDINGS.md                                      # open questions for Couchbase engineering
 docs/skill-authoring-standard.md                 # the authoring standard these skills follow
 ```

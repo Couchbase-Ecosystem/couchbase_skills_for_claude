@@ -114,7 +114,7 @@ the response against `expect` / `reject` / `threshold`:
 python3 tools/run-evals.py --execute
 ```
 
-`--execute` needs `ANTHROPIC_API_KEY` and `pip install anthropic`. It validates
+`--execute` needs `ANTHROPIC_API_KEY` and `pip install anthropic`, and it is **not run by CI** — there is no scheduled or dispatchable job for it. A full pass is roughly 2M input tokens (about $7 at Sonnet-class pricing), so it is a deliberate local run, not a background one. It validates
 the schema first and refuses to spend API calls if that fails. Narrow a run with
 `--skill <name>` (repeatable) or `--tier smoke`; `--json results.json` writes the
 full result set, `--save-answers` includes each model response, and

@@ -63,7 +63,7 @@ Checks each skill against the [Agent Skills specification](https://agentskills.i
 
 Validates the eval suites' schema: `skill` matches its directory and a real skill, case names are unique, `expect` is non-empty, `reject` is present, `threshold` is an integer no larger than the number of `expect` entries, `tier` is one of `smoke` / `standard` / `deep`, and any `expect_skill` names a skill that exists. It also warns about skills with no suite at all — a warning, not a failure, so an uncovered skill still merges unless a reviewer stops it.
 
-This gate spends no money. The executing run (`--execute`) does, which is why it lives in a scheduled and manually-dispatchable workflow rather than the pull-request gate.
+This gate spends no money and is the only eval check CI runs. The executing run (`--execute`) bills real model calls — roughly 2M input tokens for a full pass — so it is **not wired into CI at all**. It is a local tool you run deliberately, with your own key.
 
 ### Gate 3 — `tools/validate-manifests.py`
 
@@ -85,7 +85,7 @@ The anchor half is the one that earns its keep. GitHub's slugifier strips punctu
 
 ---
 
-## Running the evals
+## Running the evals by hand
 
 ```bash
 python3 tools/run-evals.py --execute                       # every case
@@ -94,11 +94,11 @@ python3 tools/run-evals.py --execute --skill couchbase-xdcr  # one skill, repeat
 python3 tools/run-evals.py --execute --json results.json --threshold 0.8
 ```
 
-Needs `ANTHROPIC_API_KEY` and `pip install anthropic`. Each case is one stateless request: the skill's `SKILL.md` body plus every reference file it links to becomes the system prompt, the case's `input` is the user turn, and the answer is graded by case-insensitive substring match — at least `threshold` of the `expect` strings present, none of the `reject` strings present.
+Needs `ANTHROPIC_API_KEY` and `pip install anthropic`. There is no CI job for this — nothing runs it on a schedule and nothing runs it on a pull request, by deliberate choice: a full pass costs around $7 and no one had agreed to fund a recurring bill. Run it when you have made a substantial content change and want to know whether the regression pins still hold. Each case is one stateless request: the skill's `SKILL.md` body plus every reference file it links to becomes the system prompt, the case's `input` is the user turn, and the answer is graded by case-insensitive substring match — at least `threshold` of the `expect` strings present, none of the `reject` strings present.
 
 Substring grading is blunt on purpose: cheap, deterministic, and reviewable in a diff. Its one real limit is that it cannot distinguish a claim from its negation, which is why a `reject` string must be one only a wrong answer produces.
 
-`--threshold` sets a pass-rate floor so a scheduled run does not go red over a single flaky case. `--json` writes the full result set, and `--save-answers` includes each model response for inspection.
+`--threshold` sets a pass-rate floor so one flaky case does not sink the whole run. `--json` writes the full result set, and `--save-answers` includes each model response for inspection.
 
 ---
 
@@ -188,7 +188,7 @@ done
 ## Release
 
 1. All four gates pass on `main`.
-2. Run the executing eval job (`Actions → evals → Run workflow`) and read the results. A regression pin that starts failing means either the skill drifted or the fact changed — find out which before releasing.
+2. Optionally run `python3 tools/run-evals.py --execute` locally and read the results. A regression pin that starts failing means either the skill drifted or the fact changed — find out which before releasing. This costs money and needs your own API key, so it is a judgement call, not a required step.
 3. Bump the version in the four manifests.
 4. Tag the release.
 

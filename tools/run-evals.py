@@ -12,8 +12,9 @@ Three modes:
         Run it after changing grading logic.
 
     python3 tools/run-evals.py --execute
-        Runs every case against a model and grades it. Costs money and needs
-        ANTHROPIC_API_KEY. Manual dispatch, never a per-push gate.
+        Runs every case against a model and grades it. Costs money (a full pass
+        is roughly 2M input tokens) and needs ANTHROPIC_API_KEY. Deliberately
+        NOT wired into CI: run it by hand when you want it.
 
 Execution model: each case is one stateless request. The skill under test is
 injected as the system prompt (its SKILL.md body, with any reference file the
