@@ -8,8 +8,12 @@ Checks:
   - the Claude, Codex and Cursor plugin manifests agree on name, version and license
   - mcp.json and gemini-extension.json declare a couchbase MCP server
   - the MCP server is configured read-only by default
-  - skills/OWNERS.yaml has exactly one entry per skill, and no orphans
+  - skills/OWNERS.yaml has exactly one entry per skill, no duplicates and no
+    orphans, and every entry has one or two DRI handles, an ISO last_reviewed
+    date that is not in the future, and a positive review_cadence_days
   - README.md lists every skill directory, and lists no skill that does not exist
+
+Run with --self-test to exercise the OWNERS.yaml checks on fixtures.
 
 Exit codes: 0 pass, 1 one or more failures.
 """
@@ -19,6 +23,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -117,18 +122,85 @@ def check_mcp_config() -> None:
             )
 
 
+OWNER_HANDLE = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}")
+
+
+def parse_owners(text: str) -> list[dict[str, str]]:
+    """Parse the flat entry list in skills/OWNERS.yaml without PyYAML.
+
+    Each entry opens with ``- name: <skill>`` and is followed by indented
+    ``key: value`` lines. Values are returned as raw strings, with trailing
+    ``# comments`` and surrounding quotes removed.
+    """
+    entries: list[dict[str, str]] = []
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].rstrip()
+        match = re.match(r"^\s*(-\s+)?([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$", line)
+        if not match or not line.startswith(" "):
+            continue  # comments, blank lines and the top-level "skills:" key
+        is_new, key, value = match.groups()
+        if is_new:
+            entries.append({})
+        if entries:
+            entries[-1][key] = value.strip().strip('"\'')
+    return entries
+
+
+def owners_problems(text: str, present: set[str], today: date) -> list[str]:
+    """Return every way OWNERS.yaml breaks its documented contract.
+
+    One entry per skill directory, no duplicates or orphans, one or two DRI
+    handles, an ISO last_reviewed date that is not in the future, and a
+    positive integer review_cadence_days.
+    """
+    problems: list[str] = []
+    entries = parse_owners(text)
+    seen: set[str] = set()
+    for index, entry in enumerate(entries, start=1):
+        name = entry.get("name", "")
+        label = f"entry '{name}'" if name else f"entry #{index}"
+        if not name:
+            problems.append(f"{label} has no 'name'")
+        elif name in seen:
+            problems.append(f"{label} is listed more than once")
+        seen.add(name)
+
+        dris_raw = entry.get("dris", "")
+        dris = [d.strip().strip("\"'") for d in dris_raw.strip("[]").split(",") if d.strip()]
+        if not dris_raw.startswith("[") or not 1 <= len(dris) <= 2:
+            problems.append(f"{label}: 'dris' must be a list of one or two GitHub usernames")
+        for handle in dris:
+            if not OWNER_HANDLE.fullmatch(handle):
+                problems.append(f"{label}: DRI '{handle}' is not a GitHub username (no leading @)")
+
+        reviewed = entry.get("last_reviewed", "")
+        try:
+            reviewed_on = date.fromisoformat(reviewed)
+        except ValueError:
+            problems.append(f"{label}: 'last_reviewed' {reviewed!r} is not a YYYY-MM-DD date")
+        else:
+            if reviewed_on > today:
+                problems.append(f"{label}: 'last_reviewed' {reviewed} is in the future")
+
+        cadence = entry.get("review_cadence_days", "")
+        if not cadence.isdigit() or int(cadence) == 0:
+            problems.append(f"{label}: 'review_cadence_days' {cadence!r} must be a positive integer")
+
+    for name in sorted(present - seen):
+        problems.append(f"no entry for skills/{name}")
+    for name in sorted(seen - present - {""}):
+        problems.append(f"entry '{name}' has no matching skill directory")
+    return problems
+
+
 def check_owners() -> None:
     path = REPO_ROOT / "skills" / "OWNERS.yaml"
     if not path.is_file():
         fail("skills/OWNERS.yaml: missing")
         return
     text = path.read_text(encoding="utf-8")
-    listed = set(re.findall(r"^\s*-\s*name:\s*(\S+)", text, re.MULTILINE))
-    present = skill_dirs()
-    for name in sorted(present - listed):
-        fail(f"skills/OWNERS.yaml: no entry for skills/{name}")
-    for name in sorted(listed - present):
-        fail(f"skills/OWNERS.yaml: entry '{name}' has no matching skill directory")
+    for problem in owners_problems(text, skill_dirs(), date.today()):
+        fail(f"skills/OWNERS.yaml: {problem}")
 
 
 def check_readme() -> None:
@@ -154,7 +226,51 @@ def check_readme() -> None:
         fail(f"README.md: links skills/{name}, which does not exist")
 
 
+OWNERS_GOOD = """skills:
+  - name: alpha
+    dris: [someone, other-one]  # interim
+    last_reviewed: "2026-01-02"
+    review_cadence_days: 90
+  - name: beta
+    dris: [someone]
+    last_reviewed: "2026-01-02"
+    review_cadence_days: 30
+"""
+
+# (label, OWNERS.yaml text, substring the problem list must contain or None)
+OWNERS_FIXTURES = [
+    ("valid file", OWNERS_GOOD, None),
+    ("duplicate entry", OWNERS_GOOD + OWNERS_GOOD.split("\n", 1)[1], "listed more than once"),
+    ("missing skill", OWNERS_GOOD.split("  - name: beta")[0], "no entry for skills/beta"),
+    ("orphan entry", OWNERS_GOOD.replace("name: beta", "name: gamma"), "no matching skill directory"),
+    ("no DRI", OWNERS_GOOD.replace("[someone]", "[]"), "one or two GitHub usernames"),
+    ("three DRIs", OWNERS_GOOD.replace("[someone]", "[a, b, c]"), "one or two GitHub usernames"),
+    ("@-prefixed DRI", OWNERS_GOOD.replace("[someone]", "[@someone]"), "is not a GitHub username"),
+    ("bad date", OWNERS_GOOD.replace('"2026-01-02"\n    review_cadence_days: 30', '"14/09/2026"\n    review_cadence_days: 30'), "not a YYYY-MM-DD date"),
+    ("future date", OWNERS_GOOD.replace("2026-01-02", "2027-01-01", 1), "is in the future"),
+    ("zero cadence", OWNERS_GOOD.replace("review_cadence_days: 30", "review_cadence_days: 0"), "positive integer"),
+    ("missing cadence", OWNERS_GOOD.replace("    review_cadence_days: 30\n", ""), "positive integer"),
+]
+
+
+def self_test() -> int:
+    failures_seen = 0
+    today = date(2026, 6, 1)
+    for label, text, want in OWNERS_FIXTURES:
+        problems = owners_problems(text, {"alpha", "beta"}, today)
+        if want is None:
+            ok = not problems
+        else:
+            ok = any(want in problem for problem in problems)
+        failures_seen += not ok
+        print(f"{'ok  ' if ok else 'FAIL'} owners: {label}" + ("" if ok else f" -> {problems}"))
+    print(f"\nSelf-test: {len(OWNERS_FIXTURES)} check(s), {failures_seen} failure(s).")
+    return 1 if failures_seen else 0
+
+
 def main() -> int:
+    if sys.argv[1:] == ["--self-test"]:
+        return self_test()
     check_marketplace()
     check_plugins()
     check_mcp_config()

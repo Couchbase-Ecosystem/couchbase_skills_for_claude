@@ -11,7 +11,7 @@ python3 tools/validate-manifests.py
 python3 tools/validate-links.py
 ```
 
-All four must pass. CI runs the same four checks on every pull request, plus a self-test of the eval grader.
+All four must pass. CI runs the same four checks on every pull request, plus self-tests of the eval grader and the `OWNERS.yaml` checks.
 
 ---
 
