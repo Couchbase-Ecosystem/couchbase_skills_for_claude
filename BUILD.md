@@ -73,7 +73,7 @@ Validates the packaging and the cross-file consistency that nothing else catches
 - the marketplace has a kebab-case name, an owner object, and a non-empty plugins array
 - the Claude, Codex and Cursor plugin manifests agree on name, version and license, declare `Apache-2.0`, and point at `./skills/` and `./mcp.json`
 - `mcp.json` and `gemini-extension.json` declare a `couchbase` server, and it is read-only by default
-- `skills/OWNERS.yaml` has exactly one entry per skill and no orphans
+- `skills/OWNERS.yaml` has exactly one entry per skill, no duplicates and no orphans, and every entry has one or two DRI handles (no `@`), a `YYYY-MM-DD` `last_reviewed` that is not in the future, and a positive `review_cadence_days` — the fields the [review cadence](#review-cadence) depends on. `--self-test` runs these checks against fixtures, and CI runs it too
 - `README.md` mentions every skill directory, and links no skill directory that does not exist
 - `gemini-extension.json` carries the same version as the plugin manifests
 

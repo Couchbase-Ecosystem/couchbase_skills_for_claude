@@ -30,5 +30,8 @@ jobs:
       - name: Validate packaging manifests
         run: python3 tools/validate-manifests.py
 
+      - name: Self-test the OWNERS.yaml checks
+        run: python3 tools/validate-manifests.py --self-test
+
       - name: Validate markdown links and anchors
         run: python3 tools/validate-links.py
